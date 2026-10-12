@@ -1,14 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿namespace Estoque.Domain.Enums;
 
-namespace Estoque.Domain.Enums
+public enum UnitOfMeasure
 {
-    public enum UnitOfMeasure
-    {
-        Kg,
-        Ton,
-        Liter,
-        Unit
-    }
+    Kg,
+    Ton,
+    Liter,
+    Unit
 }

@@ -1,13 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿namespace Estoque.Domain.Enums;
 
-namespace Estoque.Domain.Enums
+public enum UserRole
 {
-    public enum UserRole
-    {
-        Administrator,
-        Operator,
-        Consultant
-    }
+    Administrator,
+    Operator,
+    Consultant
 }

@@ -1,4 +1,5 @@
-﻿using Estoque.Domain.Exceptions;
+﻿using Estoque.Domain.Common;
+using Estoque.Domain.Exceptions;
 
 namespace Estoque.Domain.Entities;
 
@@ -24,14 +25,14 @@ public class Stock
 
     public void Add(decimal quantity)
     {
-        EnsurePositive(quantity);
+        Guard.ValidQuantity(quantity);
         TotalQuantity += quantity;
         Touch();
     }
 
     public void Remove(decimal quantity)
     {
-        EnsurePositive(quantity);
+        Guard.ValidQuantity(quantity);
         EnsureAvailable(quantity);
         TotalQuantity -= quantity;
         Touch();
@@ -39,7 +40,7 @@ public class Stock
 
     public void Reserve(decimal quantity)
     {
-        EnsurePositive(quantity);
+        Guard.ValidQuantity(quantity);
         EnsureAvailable(quantity);
         ReservedQuantity += quantity;
         Touch();
@@ -47,7 +48,7 @@ public class Stock
 
     public void ReleaseReservation(decimal quantity)
     {
-        EnsurePositive(quantity);
+        Guard.ValidQuantity(quantity);
         EnsureReserved(quantity);
         ReservedQuantity -= quantity;
         Touch();
@@ -55,17 +56,11 @@ public class Stock
 
     public void ConsumeReservation(decimal quantity)
     {
-        EnsurePositive(quantity);
+        Guard.ValidQuantity(quantity);
         EnsureReserved(quantity);
         ReservedQuantity -= quantity;
         TotalQuantity -= quantity;
         Touch();
-    }
-
-    private static void EnsurePositive(decimal quantity)
-    {
-        if (quantity <= 0)
-            throw new BusinessRuleException("A quantidade deve ser maior que zero.", "invalid_quantity");
     }
 
     private void EnsureAvailable(decimal quantity)
@@ -77,7 +72,7 @@ public class Stock
     private void EnsureReserved(decimal quantity)
     {
         if (quantity > ReservedQuantity)
-            throw new BusinessRuleException("A quantidade excede o total reservado.", "reserved_quantity_exceeded");
+            throw new BusinessRuleException("A quantidade excede o total reservado.", ErrorCodes.ReservedQuantityExceeded);
     }
 
     private void Touch() => UpdatedAt = DateTime.UtcNow;

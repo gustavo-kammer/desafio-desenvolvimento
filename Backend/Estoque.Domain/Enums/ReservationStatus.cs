@@ -1,13 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿namespace Estoque.Domain.Enums;
 
-namespace Estoque.Domain.Enums
+public enum ReservationStatus
 {
-    public enum ReservationStatus
-    {
-        Active,
-        Consumed,
-        Canceled
-    }
+    Active,
+    Consumed,
+    Canceled
 }
