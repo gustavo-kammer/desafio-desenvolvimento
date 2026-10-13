@@ -1,4 +1,10 @@
 ﻿using Estoque.Application.Abstractions;
+using Estoque.Application.Auth;
+using Estoque.Application.Movements;
+using Estoque.Application.Movements.Strategies;
+using Estoque.Application.Products;
+using Estoque.Application.Reservations;
+using Estoque.Application.Users;
 using Estoque.Domain.Repositories;
 using Estoque.Infra.Data;
 using Estoque.Infra.Data.Repositories;
@@ -27,10 +33,8 @@ public static class DependencyInjection
         services.AddScoped<IReservationRepository, ReservationRepository>();
         services.AddScoped<IStockMovementRepository, StockMovementRepository>();
 
-        services.AddOptions<JwtOptions>()
-    .Bind(configuration.GetSection(JwtOptions.SectionName))
-    .Validate(o => o.Secret.Length >= 32, "Jwt:Secret precisa ter pelo menos 32 caracteres.")
-    .ValidateOnStart();
+        services.AddOptions<JwtOptions>().Bind(configuration.GetSection(JwtOptions.SectionName))
+            .Validate(o => o.Secret.Length >= 32, "Jwt:Secret precisa ter pelo menos 32 caracteres.").ValidateOnStart();
 
         services.AddSingleton<IPasswordHasher, BcryptPasswordHasher>();
         services.AddSingleton<ITokenService, JwtTokenService>();
