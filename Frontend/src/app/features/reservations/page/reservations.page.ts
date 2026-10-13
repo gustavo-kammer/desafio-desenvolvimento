@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
-import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { DatePipe, DecimalPipe } from '@angular/common';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { Subject, catchError, of, startWith, switchMap, tap } from 'rxjs';
@@ -8,7 +8,7 @@ import { errorMessage } from '../../../core/api/api-error';
 import { ReservationsService } from '../../../core/api/reservations.service';
 import { AuthService } from '../../../core/auth/auth.service';
 import { IReservation, ReservationStatus } from '../../../core/models/api.models';
-import { BadgeComponent } from '../../../shared/components/badge/badge.component';
+import { BadgeComponent, BadgeTone } from '../../../shared/components/badge/badge.component';
 import { ButtonComponent } from '../../../shared/components/button/button.component';
 import { ConfirmDialogComponent } from '../../../shared/components/confirm-dialog/confirm-dialog.component';
 import { ModalComponent } from '../../../shared/components/modal/modal.component';
@@ -17,7 +17,6 @@ import { RESERVATION_STATUS_LABELS, UNIT_LABELS } from '../../../shared/utils/la
 import { ReservationFormComponent } from '../components/reservation-form.component';
 
 type ReservationAction = 'cancel' | 'consume';
-type BadgeTone = 'neutral' | 'success' | 'warning' | 'danger' | 'info';
 
 @Component({
   selector: 'app-reservations-page',
@@ -45,9 +44,6 @@ export class ReservationsPage {
 
   protected readonly statusControl = new FormControl<ReservationStatus | ''>('', {
     nonNullable: true,
-  });
-  private readonly _status = toSignal(this.statusControl.valueChanges, {
-    initialValue: '' as const,
   });
 
   protected readonly loading = signal<boolean>(true);
@@ -87,7 +83,7 @@ export class ReservationsPage {
           this.error.set(null);
         }),
         switchMap(() =>
-          this._reservations.list({ status: this._status() }).pipe(
+          this._reservations.list({ status: this.statusControl.value }).pipe(
             catchError((err: unknown) => {
               this.error.set(errorMessage(err));
               return of(null);

@@ -1,4 +1,12 @@
-import { ChangeDetectionStrategy, Component, inject, output, Signal, signal } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  inject,
+  output,
+  Signal,
+  signal,
+} from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { catchError, map, Observable, of } from 'rxjs';
@@ -40,6 +48,18 @@ export class ReservationFormComponent {
   protected readonly form = this._fb.nonNullable.group({
     productId: [0, [Validators.min(1)]],
     quantity: [1, [Validators.required, Validators.min(0.001)]],
+  });
+
+  private readonly _selectedProductId: Signal<number> = toSignal(
+    this.form.controls.productId.valueChanges,
+    { initialValue: 0 },
+  );
+
+  protected readonly quantityStep = computed<number>(() => {
+    const selected: IProduct | undefined = this.products().find(
+      (p: IProduct): boolean => p.id === Number(this._selectedProductId()),
+    );
+    return selected?.unit === 'unit' ? 1 : 0.001;
   });
 
   protected submit(): void {

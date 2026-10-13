@@ -1,9 +1,15 @@
-import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
+import {
+  booleanAttribute,
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  input,
+} from '@angular/core';
 
 export type ButtonVariant = 'primary' | 'secondary' | 'ghost' | 'danger';
 export type ButtonSize = 'sm' | 'md';
 
-const BASE: string =
+const BASE =
   'inline-flex items-center justify-center gap-2 rounded-md font-semibold transition focus:ring-2 focus:ring-brand-500/50 focus:ring-offset-2 focus:outline-none disabled:cursor-not-allowed disabled:opacity-60';
 
 const VARIANTS: Record<ButtonVariant, string> = {
@@ -19,12 +25,13 @@ const SIZES: Record<ButtonSize, string> = {
 };
 
 @Component({
+  // eslint-disable-next-line @angular-eslint/component-selector -- seletor de atributo em <button> é intencional
   selector: 'button[appButton]',
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
     '[class]': 'classes()',
     '[attr.aria-busy]': "loading() ? 'true' : null",
-    '[attr.disabled]': "loading() ? '' : null",
+    '[disabled]': 'disabled() || loading()',
   },
   template: `
     @if (loading()) {
@@ -40,6 +47,7 @@ export class ButtonComponent {
   public readonly variant = input<ButtonVariant>('primary');
   public readonly size = input<ButtonSize>('md');
   public readonly loading = input<boolean>(false);
+  public readonly disabled = input<boolean, unknown>(false, { transform: booleanAttribute });
 
   protected readonly classes = computed<string>(
     () => `${BASE} ${VARIANTS[this.variant()]} ${SIZES[this.size()]}`,

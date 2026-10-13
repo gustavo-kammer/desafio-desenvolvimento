@@ -1,6 +1,11 @@
 <div class="flex min-h-screen">
   @if (menuOpen()) {
-    <div class="fixed inset-0 z-30 bg-black/50 lg:hidden" (click)="closeMenu()"></div>
+    <button
+      type="button"
+      class="fixed inset-0 z-30 bg-black/50 lg:hidden"
+      aria-label="Fechar menu"
+      (click)="closeMenu()"
+    ></button>
   }
 
   <aside

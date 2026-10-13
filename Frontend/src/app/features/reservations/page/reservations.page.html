@@ -52,7 +52,9 @@
       <tbody>
         @if (loading()) {
           <tr>
-            <td colspan="8" class="py-8 text-center text-gray-500">Carregando…</td>
+            <td [attr.colspan]="canOperate() ? 8 : 7" class="py-8 text-center text-gray-500">
+              Carregando…
+            </td>
           </tr>
         } @else {
           @for (item of items(); track item.id) {
@@ -103,7 +105,7 @@
             </tr>
           } @empty {
             <tr>
-              <td colspan="8" class="py-8 text-center text-gray-500">
+              <td [attr.colspan]="canOperate() ? 8 : 7" class="py-8 text-center text-gray-500">
                 Nenhuma reserva encontrada.
               </td>
             </tr>

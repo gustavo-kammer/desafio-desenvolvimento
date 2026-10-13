@@ -1,8 +1,8 @@
 import { HttpClient } from '@angular/common/http';
-import { computed, inject, Injectable, signal } from '@angular/core';
+import { computed, inject, Injectable, Signal, signal } from '@angular/core';
 import { Router } from '@angular/router';
-import { ISession } from './interfaces/ISession';
-import { ILoginResponse, UserRole } from '../models/api.models';
+import { ILoginResponse, IUser, UserRole } from '../models/api.models';
+import { ISession } from '../models/session.models';
 import { Observable, tap } from 'rxjs';
 import { environment } from '../../../environments/environment';
 
@@ -12,21 +12,25 @@ const STORAGE_KEY = 'estoque.session';
   providedIn: 'root',
 })
 export class AuthService {
-  private readonly _http = inject(HttpClient);
-  private readonly _router = inject(Router);
+  private readonly _http: HttpClient = inject(HttpClient);
+  private readonly _router: Router = inject(Router);
 
   private readonly _session = signal<ISession | null>(this.restore());
 
-  public readonly user = computed(() => this._session()?.user ?? null);
-  public readonly role = computed(() => this._session()?.user?.role ?? null);
-  public readonly isAuthenticated = computed(() => this._session() !== null);
-  public readonly token = computed(() => this._session()?.accessToken ?? null);
+  public readonly user: Signal<IUser | null> = computed(() => this._session()?.user ?? null);
+  public readonly role: Signal<UserRole | null> = computed(
+    () => this._session()?.user?.role ?? null,
+  );
+  public readonly isAuthenticated: Signal<boolean> = computed(() => this._session() !== null);
+  public readonly token: Signal<string | null> = computed(
+    () => this._session()?.accessToken ?? null,
+  );
 
   public login(email: string, password: string): Observable<ILoginResponse> {
     return this._http
       .post<ILoginResponse>(`${environment.apiUrl}/auth/login`, { email, password })
       .pipe(
-        tap((response) => {
+        tap((response: ILoginResponse): void => {
           const session: ISession = {
             accessToken: response.accessToken,
             expiresAt: response.expiresAt,
@@ -51,7 +55,7 @@ export class AuthService {
   }
 
   public hasRole(...roles: UserRole[]): boolean {
-    const role = this.role();
+    const role: UserRole | null = this.role();
     return role !== null && roles.includes(role);
   }
 
@@ -65,10 +69,10 @@ export class AuthService {
 
   private restore(): ISession | null {
     try {
-      const raw = localStorage.getItem(STORAGE_KEY);
+      const raw: string | null = localStorage.getItem(STORAGE_KEY);
       if (!raw) return null;
 
-      const session = JSON.parse(raw) as ISession;
+      const session: ISession = JSON.parse(raw) as ISession;
       if (new Date(session.expiresAt).getTime() <= Date.now()) {
         localStorage.removeItem(STORAGE_KEY);
         return null;

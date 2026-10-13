@@ -10,7 +10,7 @@ export interface IToast {
 
 @Injectable({ providedIn: 'root' })
 export class ToastService {
-  private _nextId: number = 1;
+  private _nextId = 1;
   private readonly _toasts = signal<IToast[]>([]);
 
   public readonly toasts: Signal<IToast[]> = this._toasts.asReadonly();

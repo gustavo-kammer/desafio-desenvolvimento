@@ -16,7 +16,7 @@ export const routes: Routes = [
       {
         path: 'produtos',
         loadComponent: () =>
-          import('./features/product/page/products.page').then((m) => m.ProductsPage),
+          import('./features/products/page/products.page').then((m) => m.ProductsPage),
       },
       {
         path: 'movimentacoes',
@@ -25,7 +25,6 @@ export const routes: Routes = [
       },
       {
         path: 'reservas',
-        data: { title: 'Reservas' },
         loadComponent: () =>
           import('./features/reservations/page/reservations.page').then((m) => m.ReservationsPage),
       },

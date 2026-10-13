@@ -26,7 +26,13 @@
 
   <div>
     <label for="quantity" class="field-label">Quantidade</label>
-    <input id="quantity" type="number" step="any" formControlName="quantity" class="field-input" />
+    <input
+      id="quantity"
+      type="number"
+      [attr.step]="quantityStep()"
+      formControlName="quantity"
+      class="field-input"
+    />
     @if (form.controls.quantity.touched && form.controls.quantity.invalid) {
       <p class="field-error">Informe uma quantidade maior que zero.</p>
     }

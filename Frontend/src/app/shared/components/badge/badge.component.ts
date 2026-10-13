@@ -2,7 +2,7 @@ import { ChangeDetectionStrategy, Component, computed, input } from '@angular/co
 
 export type BadgeTone = 'neutral' | 'success' | 'warning' | 'danger' | 'info';
 
-const BASE: string = 'inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium';
+const BASE = 'inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium';
 
 const TONES: Record<BadgeTone, string> = {
   neutral: 'bg-slate-100 text-slate-700',

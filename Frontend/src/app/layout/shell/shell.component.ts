@@ -1,7 +1,14 @@
-import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  inject,
+  Signal,
+  signal,
+} from '@angular/core';
 import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { AuthService } from '../../core/auth/auth.service';
-import { UserRole } from '../../core/models/api.models';
+import { IUser, UserRole } from '../../core/models/api.models';
 import { BadgeComponent } from '../../shared/components/badge/badge.component';
 import { ButtonComponent } from '../../shared/components/button/button.component';
 import { ROLE_LABELS } from '../../shared/utils/labels';
@@ -16,7 +23,7 @@ import { INavItem, NAV_ITEMS } from '../nav-items';
 export class ShellComponent {
   private readonly _auth: AuthService = inject(AuthService);
 
-  protected readonly user = this._auth.user;
+  protected readonly user: Signal<IUser | null> = this._auth.user;
   protected readonly menuOpen = signal<boolean>(false);
 
   protected readonly items = computed<INavItem[]>(() =>

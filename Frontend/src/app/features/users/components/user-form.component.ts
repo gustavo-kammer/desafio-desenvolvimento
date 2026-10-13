@@ -12,6 +12,7 @@ import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Observable } from 'rxjs';
 import { errorMessage } from '../../../core/api/api-error';
 import { UsersService } from '../../../core/api/users.service';
+import { AuthService } from '../../../core/auth/auth.service';
 import { IUser, UserRole } from '../../../core/models/api.models';
 import { ButtonComponent } from '../../../shared/components/button/button.component';
 import { ROLE_LABELS } from '../../../shared/utils/labels';
@@ -30,6 +31,7 @@ interface IRoleOption {
 export class UserFormComponent implements OnInit {
   private readonly _fb: FormBuilder = inject(FormBuilder);
   private readonly _usersService: UsersService = inject(UsersService);
+  private readonly _auth: AuthService = inject(AuthService);
 
   public readonly user = input<IUser | null>(null);
 
@@ -56,6 +58,9 @@ export class UserFormComponent implements OnInit {
     if (current) {
       this.form.patchValue({ name: current.name, email: current.email, role: current.role });
       this.form.controls.password.disable();
+      if (this._auth.user()?.id === current.id) {
+        this.form.controls.role.disable();
+      }
     }
   }
 

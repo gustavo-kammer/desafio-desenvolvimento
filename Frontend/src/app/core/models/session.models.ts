@@ -1,4 +1,4 @@
-import { IUser } from '../../models/api.models';
+import { IUser } from './api.models';
 
 export interface ISession {
   accessToken: string;

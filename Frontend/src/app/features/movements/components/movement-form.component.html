@@ -58,7 +58,7 @@
         id="mf-quantity"
         type="number"
         min="0"
-        step="0.001"
+        [attr.step]="selectedProduct()?.unit === 'unit' ? 1 : 0.001"
         class="field-input"
         formControlName="quantity"
       />
