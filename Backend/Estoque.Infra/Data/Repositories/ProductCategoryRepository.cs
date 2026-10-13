@@ -10,5 +10,5 @@ internal sealed class ProductCategoryRepository(AppDbContext db) : IProductCateg
         db.ProductCategories.AsNoTracking().FirstOrDefaultAsync(c => c.Id == id, ct);
 
     public async Task<IReadOnlyList<ProductCategory>> ListAsync(CancellationToken ct = default) =>
-        await db.ProductCategories.AsNoTracking().OrderBy(c => c.Name).ToListAsync(ct);
+        await db.ProductCategories.AsNoTracking().OrderBy(c => c.Id).ToListAsync(ct);
 }

@@ -33,6 +33,14 @@ internal sealed class GlobalExceptionHandler(ILogger<GlobalExceptionHandler> log
         DbUpdateException { InnerException: PostgresException { SqlState: PostgresErrorCodes.UniqueViolation } } =>
             new(409, "Conflito.", "Já existe um registro com esse valor.", ApiErrorCodes.DuplicateValue),
 
+        DbUpdateException
+        {
+            InnerException: PostgresException
+            {
+                SqlState: PostgresErrorCodes.NumericValueOutOfRange or PostgresErrorCodes.StringDataRightTruncation
+            }
+        } => new(400, "Requisição inválida.", "Algum valor excede o limite permitido.", ApiErrorCodes.InvalidRequest),
+
         ArgumentException e => new(400, "Requisição inválida.",
             $"Valor inválido para '{e.ParamName}'.", ApiErrorCodes.InvalidRequest),
 

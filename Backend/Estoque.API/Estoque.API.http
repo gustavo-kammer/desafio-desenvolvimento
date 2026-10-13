@@ -1,6 +1,84 @@
-@Estoque.API_HostAddress = http://localhost:5046
+@host = http://localhost:5046
 
-GET {{Estoque.API_HostAddress}}/weatherforecast/
-Accept: application/json
+### 1) Login como administrador
+# @name login
+POST {{host}}/api/auth/login
+Content-Type: application/json
+
+{ "email": "admin@estoque.com", "password": "Admin@12345" }
 
 ###
+@token = {{login.response.body.$.accessToken}}
+
+### 2) Quem sou eu
+GET {{host}}/api/auth/me
+Authorization: Bearer {{token}}
+
+### 3) Categorias
+GET {{host}}/api/categories
+Authorization: Bearer {{token}}
+
+### 4) Criar produto
+POST {{host}}/api/products
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{ "categoryId": 2, "code": "FR-001", "name": "Frita transparente", "unit": "kg", "minimumStock": 100 }
+
+### 5) Entrada de estoque
+POST {{host}}/api/stock/entries
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{ "productId": 1, "quantity": 500, "referenceDocument": "NF-1234" }
+
+### 6) Saída
+POST {{host}}/api/stock/exits
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{ "productId": 1, "quantity": 50, "reason": "consumption" }
+
+### 7) Reservar
+POST {{host}}/api/reservations
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{ "productId": 1, "quantity": 120 }
+
+### 8) Cancelar reserva
+POST {{host}}/api/reservations/1/cancel
+Authorization: Bearer {{token}}
+
+### 9) Consumir reserva (use uma nova reserva)
+POST {{host}}/api/reservations/1/consume
+Authorization: Bearer {{token}}
+
+### 10) Ajuste manual (exige motivo e justificativa)
+POST {{host}}/api/stock/adjustments/decrease
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{ "productId": 1, "quantity": 5, "reason": "inventoryCorrection", "justification": "Contagem física divergente" }
+
+### 11) Produto com saldo atual
+GET {{host}}/api/products/1
+Authorization: Bearer {{token}}
+
+### 12) Histórico de movimentações
+GET {{host}}/api/stock/movements?productId=1&page=1&pageSize=20
+Authorization: Bearer {{token}}
+
+### 13) Criar usuário Operador
+POST {{host}}/api/users
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{ "name": "Maria Operadora", "email": "maria@estoque.com", "password": "Senha@1234", "role": "operator" }
+
+### 14) Erro esperado: saída maior que o disponível (422 insufficient_stock)
+POST {{host}}/api/stock/exits
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{ "productId": 1, "quantity": 99999 }
