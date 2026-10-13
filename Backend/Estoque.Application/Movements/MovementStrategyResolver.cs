@@ -1,7 +1,7 @@
 ﻿using Estoque.Domain.Enums;
 using Estoque.Domain.Exceptions;
 
-namespace Estoque.Application.Movements.Strategies;
+namespace Estoque.Application.Movements;
 
 public sealed class MovementStrategyResolver(IEnumerable<IMovementStrategy> strategies)
 {

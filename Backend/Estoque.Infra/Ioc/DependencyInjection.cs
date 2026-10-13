@@ -34,7 +34,10 @@ public static class DependencyInjection
         services.AddScoped<IStockMovementRepository, StockMovementRepository>();
 
         services.AddOptions<JwtOptions>().Bind(configuration.GetSection(JwtOptions.SectionName))
-            .Validate(o => o.Secret.Length >= 32, "Jwt:Secret precisa ter pelo menos 32 caracteres.").ValidateOnStart();
+            .Validate(o => o.Secret.Length >= 32, "Jwt:Secret precisa ter pelo menos 32 caracteres.")
+            .Validate(o => !string.IsNullOrWhiteSpace(o.Issuer) && !string.IsNullOrWhiteSpace(o.Audience),
+                "Jwt:Issuer e Jwt:Audience são obrigatórios.")
+            .ValidateOnStart();
 
         services.AddSingleton<IPasswordHasher, BcryptPasswordHasher>();
         services.AddSingleton<ITokenService, JwtTokenService>();

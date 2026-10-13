@@ -71,14 +71,13 @@ public sealed class ReservationService(
     }
 
     public async Task<IReadOnlyList<ReservationDto>> ListAsync(
-    ReservationStatus? status, int? productId, CancellationToken ct = default) =>
-    (await reservations.ListAsync(status, productId, ct)).Select(ReservationDto.From).ToList();
+        ReservationStatus? status, int? productId, CancellationToken ct = default) =>
+        (await reservations.ListAsync(status, productId, ct)).Select(ReservationDto.From).ToList();
 
     private async Task<Product> GetProductAsync(int productId, CancellationToken ct) =>
         await products.GetByIdAsync(productId, ct)
             ?? throw new NotFoundException($"Produto {productId} não encontrado.");
 
     private async Task<ReservationDto> ToDtoAsync(Reservation reservation, CancellationToken ct) =>
-    ReservationDto.From(await reservations.GetDetailedAsync(reservation.Id, ct) ?? reservation);
-
+        ReservationDto.From(await reservations.GetDetailedAsync(reservation.Id, ct) ?? reservation);
 }

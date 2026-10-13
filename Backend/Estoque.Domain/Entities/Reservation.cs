@@ -40,7 +40,8 @@ public class Reservation
     {
         if (!IsActive)
         {
-            throw new BusinessRuleException($"A reserva {Id} já foi encerrada ({Status}).", ErrorCodes.ReservationNotActive);
+            var situation = Status == ReservationStatus.Canceled ? "cancelada" : "consumida";
+            throw new BusinessRuleException($"A reserva {Id} já foi {situation}.", ErrorCodes.ReservationNotActive);
         }
 
         Status = newStatus;

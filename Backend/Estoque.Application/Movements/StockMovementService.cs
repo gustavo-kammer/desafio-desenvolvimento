@@ -1,5 +1,4 @@
 ﻿using Estoque.Application.Abstractions;
-using Estoque.Application.Movements.Strategies;
 using Estoque.Domain.Common;
 using Estoque.Domain.Enums;
 using Estoque.Domain.Repositories;
