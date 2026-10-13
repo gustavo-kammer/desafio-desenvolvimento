@@ -1,0 +1,68 @@
+<header class="mb-6 flex flex-wrap items-start justify-between gap-3">
+  <div>
+    <h1 class="text-2xl font-bold">Categorias</h1>
+    <p class="mt-1 text-sm text-slate-600">Organize os produtos do catálogo.</p>
+  </div>
+  <button appButton type="button" (click)="openCreate()">Nova categoria</button>
+</header>
+
+@if (error(); as message) {
+  <div
+    role="alert"
+    class="mb-4 flex items-center justify-between gap-3 rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800"
+  >
+    <span>{{ message }}</span>
+    <button appButton type="button" variant="secondary" size="sm" (click)="load()">
+      Tentar novamente
+    </button>
+  </div>
+}
+
+<section class="card overflow-hidden">
+  <div class="overflow-x-auto">
+    <table class="data-table" [class.opacity-60]="loading()">
+      <thead>
+        <tr>
+          <th scope="col">Nome</th>
+          <th scope="col">Descrição</th>
+          <th scope="col"><span class="sr-only">Ações</span></th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (category of categories(); track category.id) {
+          <tr>
+            <td class="font-medium">{{ category.name }}</td>
+            <td class="text-slate-600">{{ category.description ?? '—' }}</td>
+            <td class="text-right">
+              <button
+                appButton
+                type="button"
+                variant="ghost"
+                size="sm"
+                (click)="openEdit(category)"
+              >
+                Editar
+              </button>
+            </td>
+          </tr>
+        } @empty {
+          <tr>
+            <td colspan="3" class="py-10 text-center text-slate-500">
+              {{ loading() ? 'Carregando...' : 'Nenhuma categoria cadastrada.' }}
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<app-modal [(open)]="formOpen" [title]="editing() ? 'Editar categoria' : 'Nova categoria'">
+  @if (formOpen()) {
+    <app-category-form
+      [category]="editing()"
+      (saved)="onSaved($event)"
+      (cancelled)="formOpen.set(false)"
+    />
+  }
+</app-modal>

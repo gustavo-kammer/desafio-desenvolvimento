@@ -1,0 +1,131 @@
+<section class="space-y-6">
+  <header class="flex flex-wrap items-center justify-between gap-3">
+    <div>
+      <h1 class="text-2xl font-bold">Reservas</h1>
+      <p class="text-sm text-gray-600">Quantidades separadas do estoque disponível.</p>
+    </div>
+    @if (canOperate()) {
+      <button appButton type="button" (click)="openCreate()">Nova reserva</button>
+    }
+  </header>
+
+  <div class="card flex flex-wrap items-end gap-4 p-4">
+    <div>
+      <label for="status" class="field-label">Status</label>
+      <select id="status" class="field-input" [formControl]="statusControl">
+        <option value="">Todos</option>
+        <option value="active">{{ statusLabels['active'] }}</option>
+        <option value="consumed">{{ statusLabels['consumed'] }}</option>
+        <option value="canceled">{{ statusLabels['canceled'] }}</option>
+      </select>
+    </div>
+  </div>
+
+  @if (error(); as message) {
+    <div
+      class="flex items-center justify-between rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700"
+      role="alert"
+    >
+      <span>{{ message }}</span>
+      <button appButton type="button" variant="secondary" size="sm" (click)="reload()">
+        Tentar novamente
+      </button>
+    </div>
+  }
+
+  <div class="card overflow-x-auto">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Produto</th>
+          <th class="text-right">Quantidade</th>
+          <th>Status</th>
+          <th>Criada por</th>
+          <th>Criada em</th>
+          <th>Encerrada por</th>
+          <th>Encerrada em</th>
+          @if (canOperate()) {
+            <th class="text-right">Ações</th>
+          }
+        </tr>
+      </thead>
+      <tbody>
+        @if (loading()) {
+          <tr>
+            <td colspan="8" class="py-8 text-center text-gray-500">Carregando…</td>
+          </tr>
+        } @else {
+          @for (item of items(); track item.id) {
+            <tr>
+              <td>
+                <div class="font-medium">{{ item.product?.name ?? '—' }}</div>
+                <div class="text-xs text-gray-500">{{ item.product?.code }}</div>
+              </td>
+              <td class="text-right tabular-nums">
+                {{ item.quantity | number: '1.0-3' }}
+                @if (item.product) {
+                  <span class="text-xs text-gray-500">{{ unitLabels[item.product.unit] }}</span>
+                }
+              </td>
+              <td>
+                <app-badge [tone]="tone(item.status)">{{ statusLabels[item.status] }}</app-badge>
+              </td>
+              <td>{{ item.createdBy?.name ?? '—' }}</td>
+              <td>{{ item.createdAt | date: 'dd/MM/yyyy HH:mm' }}</td>
+              <td>{{ item.closedBy?.name ?? '—' }}</td>
+              <td>{{ item.closedAt ? (item.closedAt | date: 'dd/MM/yyyy HH:mm') : '—' }}</td>
+              @if (canOperate()) {
+                <td class="text-right">
+                  @if (item.status === 'active') {
+                    <div class="flex justify-end gap-2">
+                      <button
+                        appButton
+                        type="button"
+                        size="sm"
+                        variant="secondary"
+                        (click)="askAction(item, 'consume')"
+                      >
+                        Consumir
+                      </button>
+                      <button
+                        appButton
+                        type="button"
+                        size="sm"
+                        variant="ghost"
+                        (click)="askAction(item, 'cancel')"
+                      >
+                        Cancelar
+                      </button>
+                    </div>
+                  }
+                </td>
+              }
+            </tr>
+          } @empty {
+            <tr>
+              <td colspan="8" class="py-8 text-center text-gray-500">
+                Nenhuma reserva encontrada.
+              </td>
+            </tr>
+          }
+        }
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<app-modal [(open)]="formOpen" title="Nova reserva">
+  @if (formOpen()) {
+    <app-reservation-form (saved)="onSaved()" (cancelled)="formOpen.set(false)" />
+  }
+</app-modal>
+
+<app-confirm-dialog
+  [(open)]="confirmOpen"
+  [title]="confirmTitle()"
+  [message]="confirmMessage()"
+  [confirmLabel]="action() === 'cancel' ? 'Cancelar reserva' : 'Consumir'"
+  [variant]="action() === 'cancel' ? 'danger' : 'primary'"
+  [loading]="acting()"
+  (confirmed)="confirm()"
+/>

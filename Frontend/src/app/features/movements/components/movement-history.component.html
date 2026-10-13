@@ -1,0 +1,140 @@
+<section class="card mb-4 grid gap-4 p-4 sm:grid-cols-2 lg:grid-cols-5">
+  <div class="lg:col-span-2">
+    <label for="mh-product" class="field-label">Produto</label>
+    <select id="mh-product" class="field-input" [formControl]="productControl">
+      <option [ngValue]="null">Todos</option>
+      @for (product of products(); track product.id) {
+        <option [ngValue]="product.id">{{ product.code }} · {{ product.name }}</option>
+      }
+    </select>
+  </div>
+
+  <div>
+    <label for="mh-type" class="field-label">Tipo</label>
+    <select id="mh-type" class="field-input" [formControl]="typeControl">
+      <option [ngValue]="null">Todos</option>
+      @for (option of typeOptions; track option.value) {
+        <option [ngValue]="option.value">{{ option.label }}</option>
+      }
+    </select>
+  </div>
+
+  <div>
+    <label for="mh-from" class="field-label">De</label>
+    <input id="mh-from" type="date" class="field-input" [formControl]="fromControl" />
+  </div>
+
+  <div>
+    <label for="mh-to" class="field-label">Até</label>
+    <input id="mh-to" type="date" class="field-input" [formControl]="toControl" />
+  </div>
+
+  <div class="sm:col-span-2 lg:col-span-5">
+    <button appButton type="button" variant="ghost" size="sm" (click)="clearFilters()">
+      Limpar filtros
+    </button>
+  </div>
+</section>
+
+@if (error(); as message) {
+  <div
+    role="alert"
+    class="mb-4 flex items-center justify-between gap-3 rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800"
+  >
+    <span>{{ message }}</span>
+    <button appButton type="button" variant="secondary" size="sm" (click)="reload()">
+      Tentar novamente
+    </button>
+  </div>
+}
+
+<section class="card overflow-hidden">
+  <div class="overflow-x-auto">
+    <table class="data-table" [class.opacity-60]="loading()">
+      <thead>
+        <tr>
+          <th scope="col">Data</th>
+          <th scope="col">Tipo</th>
+          <th scope="col">Produto</th>
+          <th scope="col" class="text-right">Quantidade</th>
+          <th scope="col" class="text-right">Saldo total</th>
+          <th scope="col" class="text-right">Reservado</th>
+          <th scope="col">Responsável</th>
+          <th scope="col">Detalhes</th>
+        </tr>
+      </thead>
+      <tbody>
+        @if (result(); as data) {
+          @for (movement of data.items; track movement.id) {
+            <tr>
+              <td class="whitespace-nowrap text-slate-600">
+                {{ movement.occurredAt | date: 'dd/MM/yyyy HH:mm' }}
+              </td>
+              <td>
+                <app-badge [tone]="typeTone(movement.type)">{{
+                  typeLabel(movement.type)
+                }}</app-badge>
+              </td>
+              <td>
+                <p class="font-medium">{{ movement.product.name }}</p>
+                <p class="font-mono text-xs text-slate-500">{{ movement.product.code }}</p>
+              </td>
+              <td class="whitespace-nowrap text-right font-semibold">
+                {{ movement.quantity | number: '1.0-3' }} {{ unitLabel(movement.product.unit) }}
+              </td>
+              <td class="whitespace-nowrap text-right text-slate-600">
+                {{ movement.totalBefore | number: '1.0-3' }} →
+                <strong class="text-slate-900">{{ movement.totalAfter | number: '1.0-3' }}</strong>
+              </td>
+              <td class="whitespace-nowrap text-right text-slate-600">
+                {{ movement.reservedBefore | number: '1.0-3' }} →
+                <strong class="text-slate-900">{{
+                  movement.reservedAfter | number: '1.0-3'
+                }}</strong>
+              </td>
+              <td>
+                <p class="text-sm">{{ movement.user.name }}</p>
+                <p class="text-xs text-slate-500">{{ movement.user.email }}</p>
+              </td>
+              <td class="max-w-xs space-y-0.5 text-xs text-slate-600">
+                @if (movement.reason) {
+                  <p class="font-semibold text-slate-800">{{ reasonLabel(movement.reason) }}</p>
+                }
+                @if (movement.justification) {
+                  <p>{{ movement.justification }}</p>
+                }
+                @if (movement.referenceDocument) {
+                  <p>Doc.: {{ movement.referenceDocument }}</p>
+                }
+                @if (movement.reservationId) {
+                  <p>Reserva #{{ movement.reservationId }}</p>
+                }
+              </td>
+            </tr>
+          } @empty {
+            <tr>
+              <td colspan="8" class="py-10 text-center text-slate-500">
+                Nenhuma movimentação encontrada.
+              </td>
+            </tr>
+          }
+        } @else if (loading()) {
+          <tr>
+            <td colspan="8" class="py-10 text-center text-slate-500">Carregando...</td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+
+  @if (result(); as data) {
+    <div class="border-t border-slate-200 px-4 py-3">
+      <app-pagination
+        [page]="data.page"
+        [totalPages]="data.totalPages"
+        [totalCount]="data.totalCount"
+        (pageChange)="goToPage($event)"
+      />
+    </div>
+  }
+</section>

@@ -151,3 +151,7 @@ export interface IUpdateUserRequest {
   email: string;
   role: UserRole;
 }
+
+export interface IResetPasswordRequest {
+  newPassword: string;
+}

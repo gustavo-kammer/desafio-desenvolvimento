@@ -2,6 +2,7 @@ import { DecimalPipe } from '@angular/common';
 import {
   ChangeDetectionStrategy,
   Component,
+  computed,
   DestroyRef,
   inject,
   OnInit,
@@ -23,19 +24,35 @@ import {
 import { errorMessage } from '../../../core/api/api-error';
 import { CategoriesService } from '../../../core/api/categories.service';
 import { IProductFilter, ProductsService } from '../../../core/api/products.service';
+import { AuthService } from '../../../core/auth/auth.service';
 import { ICategory, IPagedResult, IProduct, UnitOfMeasure } from '../../../core/models/api.models';
 import { BadgeComponent } from '../../../shared/components/badge/badge.component';
 import { ButtonComponent } from '../../../shared/components/button/button.component';
+import { ConfirmDialogComponent } from '../../../shared/components/confirm-dialog/confirm-dialog.component';
+import { ModalComponent } from '../../../shared/components/modal/modal.component';
 import { PaginationComponent } from '../../../shared/components/pagination/pagination.component';
+import { ToastService } from '../../../shared/components/toast/toast.service';
 import { UNIT_LABELS } from '../../../shared/utils/labels';
+import { ProductFormComponent } from '../components/product-form.component';
 
 @Component({
   selector: 'app-products-page',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ReactiveFormsModule, DecimalPipe, BadgeComponent, ButtonComponent, PaginationComponent],
+  imports: [
+    ReactiveFormsModule,
+    DecimalPipe,
+    BadgeComponent,
+    ButtonComponent,
+    ConfirmDialogComponent,
+    ModalComponent,
+    PaginationComponent,
+    ProductFormComponent,
+  ],
   templateUrl: './products.page.html',
 })
 export class ProductsPage implements OnInit {
+  private readonly _auth: AuthService = inject(AuthService);
+  private readonly _toast: ToastService = inject(ToastService);
   private readonly _productsService: ProductsService = inject(ProductsService);
   private readonly _categoriesService: CategoriesService = inject(CategoriesService);
   private readonly _destroyRef: DestroyRef = inject(DestroyRef);
@@ -45,11 +62,24 @@ export class ProductsPage implements OnInit {
   protected readonly categoryControl = new FormControl<number | null>(null);
   protected readonly belowMinimumControl = new FormControl<boolean>(false, { nonNullable: true });
 
+  protected readonly canManage = computed<boolean>(() => this._auth.hasRole('administrator'));
+
   protected readonly categories = signal<ICategory[]>([]);
   protected readonly result = signal<IPagedResult<IProduct> | null>(null);
   protected readonly loading = signal<boolean>(false);
   protected readonly error = signal<string | null>(null);
   protected readonly page = signal<number>(1);
+
+  protected readonly formOpen = signal<boolean>(false);
+  protected readonly editing = signal<IProduct | null>(null);
+
+  protected readonly archiveOpen = signal<boolean>(false);
+  protected readonly archiveTarget = signal<IProduct | null>(null);
+  protected readonly archiving = signal<boolean>(false);
+  protected readonly archiveMessage = computed<string>(
+    () =>
+      `Deseja arquivar "${this.archiveTarget()?.name ?? ''}"? O produto deixa de aparecer na lista, mas o histórico de movimentações é mantido.`,
+  );
 
   public ngOnInit(): void {
     this._categoriesService.list().subscribe({
@@ -104,6 +134,52 @@ export class ProductsPage implements OnInit {
 
   protected unitLabel(unit: UnitOfMeasure): string {
     return UNIT_LABELS[unit];
+  }
+
+  protected openCreate(): void {
+    this.editing.set(null);
+    this.formOpen.set(true);
+  }
+
+  protected openEdit(product: IProduct): void {
+    this.editing.set(product);
+    this.formOpen.set(true);
+  }
+
+  protected onSaved(product: IProduct): void {
+    const wasEditing: boolean = this.editing() !== null;
+    this._toast.success(
+      wasEditing ? `Produto "${product.name}" atualizado.` : `Produto "${product.name}" criado.`,
+    );
+    this.formOpen.set(false);
+    this.reload();
+  }
+
+  protected askArchive(product: IProduct): void {
+    this.archiveTarget.set(product);
+    this.archiveOpen.set(true);
+  }
+
+  protected confirmArchive(): void {
+    const target: IProduct | null = this.archiveTarget();
+    if (!target) {
+      return;
+    }
+
+    this.archiving.set(true);
+    this._productsService.archive(target.id).subscribe({
+      next: (): void => {
+        this._toast.success(`Produto "${target.name}" arquivado.`);
+        this.archiving.set(false);
+        this.archiveOpen.set(false);
+        this.reload();
+      },
+      error: (err: unknown): void => {
+        this._toast.error(errorMessage(err));
+        this.archiving.set(false);
+        this.archiveOpen.set(false);
+      },
+    });
   }
 
   private buildFilter(): IProductFilter {

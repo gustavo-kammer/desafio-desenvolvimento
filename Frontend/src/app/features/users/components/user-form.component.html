@@ -1,0 +1,66 @@
+<form class="space-y-4" [formGroup]="form" (ngSubmit)="submit()" novalidate>
+  @if (error(); as message) {
+    <div
+      role="alert"
+      class="rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800"
+    >
+      {{ message }}
+    </div>
+  }
+
+  <div>
+    <label for="uf-name" class="field-label">Nome</label>
+    <input id="uf-name" class="field-input" formControlName="name" maxlength="120" />
+    @if (form.controls.name.touched && form.controls.name.invalid) {
+      <p class="field-error">Informe o nome.</p>
+    }
+  </div>
+
+  <div>
+    <label for="uf-email" class="field-label">E-mail</label>
+    <input
+      id="uf-email"
+      type="email"
+      class="field-input"
+      formControlName="email"
+      maxlength="160"
+      autocomplete="off"
+    />
+    @if (form.controls.email.touched && form.controls.email.invalid) {
+      <p class="field-error">Informe um e-mail válido.</p>
+    }
+  </div>
+
+  <div>
+    <label for="uf-role" class="field-label">Perfil</label>
+    <select id="uf-role" class="field-input" formControlName="role">
+      @for (option of roleOptions; track option.value) {
+        <option [value]="option.value">{{ option.label }}</option>
+      }
+    </select>
+  </div>
+
+  @if (!isEditing()) {
+    <div>
+      <label for="uf-password" class="field-label">Senha inicial</label>
+      <input
+        id="uf-password"
+        type="password"
+        class="field-input"
+        formControlName="password"
+        maxlength="72"
+        autocomplete="new-password"
+      />
+      @if (form.controls.password.touched && form.controls.password.invalid) {
+        <p class="field-error">A senha deve ter de 8 a 72 caracteres.</p>
+      }
+    </div>
+  }
+
+  <div class="flex justify-end gap-2 pt-2">
+    <button appButton type="button" variant="secondary" (click)="cancelled.emit()">Cancelar</button>
+    <button appButton type="submit" [loading]="saving()">
+      {{ isEditing() ? 'Salvar alterações' : 'Criar usuário' }}
+    </button>
+  </div>
+</form>

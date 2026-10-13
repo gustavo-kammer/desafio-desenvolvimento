@@ -1,10 +1,6 @@
 import { Routes } from '@angular/router';
 import { authGuard, guestGuard, roleGuard } from './core/auth/auth.guards';
 
-const loadPlaceholder = (): Promise<
-  typeof import('./features/placeholder/placeholder.page').PlaceholderPage
-> => import('./features/placeholder/placeholder.page').then((m) => m.PlaceholderPage);
-
 export const routes: Routes = [
   {
     path: 'login',
@@ -24,25 +20,25 @@ export const routes: Routes = [
       },
       {
         path: 'movimentacoes',
-        data: { title: 'Movimentações' },
-        loadComponent: loadPlaceholder,
+        loadComponent: () =>
+          import('./features/movements/page/movements.page').then((m) => m.MovementsPage),
       },
       {
         path: 'reservas',
         data: { title: 'Reservas' },
-        loadComponent: loadPlaceholder,
+        loadComponent: () =>
+          import('./features/reservations/page/reservations.page').then((m) => m.ReservationsPage),
       },
       {
         path: 'categorias',
         canActivate: [roleGuard('administrator')],
-        data: { title: 'Categorias' },
-        loadComponent: loadPlaceholder,
+        loadComponent: () =>
+          import('./features/categories/page/categories.page').then((m) => m.CategoriesPage),
       },
       {
         path: 'usuarios',
         canActivate: [roleGuard('administrator')],
-        data: { title: 'Usuários' },
-        loadComponent: loadPlaceholder,
+        loadComponent: () => import('./features/users/page/users.page').then((m) => m.UsersPage),
       },
     ],
   },

@@ -1,0 +1,36 @@
+<form class="space-y-4" [formGroup]="form" (ngSubmit)="submit()" novalidate>
+  @if (error(); as message) {
+    <div
+      role="alert"
+      class="rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800"
+    >
+      {{ message }}
+    </div>
+  }
+
+  <div>
+    <label for="cf-name" class="field-label">Nome</label>
+    <input id="cf-name" class="field-input" formControlName="name" maxlength="120" />
+    @if (form.controls.name.touched && form.controls.name.invalid) {
+      <p class="field-error">Informe o nome da categoria.</p>
+    }
+  </div>
+
+  <div>
+    <label for="cf-description" class="field-label">Descrição (opcional)</label>
+    <textarea
+      id="cf-description"
+      rows="3"
+      class="field-input"
+      formControlName="description"
+      maxlength="500"
+    ></textarea>
+  </div>
+
+  <div class="flex justify-end gap-2 pt-2">
+    <button appButton type="button" variant="secondary" (click)="cancelled.emit()">Cancelar</button>
+    <button appButton type="submit" [loading]="saving()">
+      {{ isEditing() ? 'Salvar alterações' : 'Criar categoria' }}
+    </button>
+  </div>
+</form>

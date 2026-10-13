@@ -1,6 +1,11 @@
-<header class="mb-6">
-  <h1 class="text-2xl font-bold">Produtos</h1>
-  <p class="mt-1 text-sm text-slate-600">Consulte o saldo, as reservas e o estoque disponível.</p>
+<header class="mb-6 flex flex-wrap items-start justify-between gap-3">
+  <div>
+    <h1 class="text-2xl font-bold">Produtos</h1>
+    <p class="mt-1 text-sm text-slate-600">Consulte o saldo, as reservas e o estoque disponível.</p>
+  </div>
+  @if (canManage()) {
+    <button appButton type="button" (click)="openCreate()">Novo produto</button>
+  }
 </header>
 
 <section class="card mb-4 grid gap-4 p-4 sm:grid-cols-2 lg:grid-cols-4">
@@ -60,6 +65,9 @@
           <th scope="col" class="text-right">Disponível</th>
           <th scope="col" class="text-right">Mínimo</th>
           <th scope="col">Situação</th>
+          @if (canManage()) {
+            <th scope="col"><span class="sr-only">Ações</span></th>
+          }
         </tr>
       </thead>
       <tbody>
@@ -88,17 +96,39 @@
                   <app-badge tone="success">Regular</app-badge>
                 }
               </td>
+              @if (canManage()) {
+                <td class="whitespace-nowrap text-right">
+                  <button
+                    appButton
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    (click)="openEdit(product)"
+                  >
+                    Editar
+                  </button>
+                  <button
+                    appButton
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    (click)="askArchive(product)"
+                  >
+                    Arquivar
+                  </button>
+                </td>
+              }
             </tr>
           } @empty {
             <tr>
-              <td colspan="8" class="py-10 text-center text-slate-500">
+              <td colspan="9" class="py-10 text-center text-slate-500">
                 Nenhum produto encontrado.
               </td>
             </tr>
           }
         } @else if (loading()) {
           <tr>
-            <td colspan="8" class="py-10 text-center text-slate-500">Carregando...</td>
+            <td colspan="9" class="py-10 text-center text-slate-500">Carregando...</td>
           </tr>
         }
       </tbody>
@@ -116,3 +146,23 @@
     </div>
   }
 </section>
+
+<app-modal [(open)]="formOpen" [title]="editing() ? 'Editar produto' : 'Novo produto'">
+  @if (formOpen()) {
+    <app-product-form
+      [product]="editing()"
+      [categories]="categories()"
+      (saved)="onSaved($event)"
+      (cancelled)="formOpen.set(false)"
+    />
+  }
+</app-modal>
+
+<app-confirm-dialog
+  [(open)]="archiveOpen"
+  title="Arquivar produto"
+  confirmLabel="Arquivar"
+  [message]="archiveMessage()"
+  [loading]="archiving()"
+  (confirmed)="confirmArchive()"
+/>

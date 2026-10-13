@@ -1,0 +1,96 @@
+<form class="space-y-4" [formGroup]="form" (ngSubmit)="submit()" novalidate>
+  @if (error(); as message) {
+    <div
+      role="alert"
+      class="rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800"
+    >
+      {{ message }}
+    </div>
+  }
+
+  <div class="grid gap-4 sm:grid-cols-2">
+    <div>
+      <label for="pf-code" class="field-label">Código</label>
+      <input
+        id="pf-code"
+        class="field-input uppercase"
+        formControlName="code"
+        maxlength="40"
+        autocomplete="off"
+      />
+      @if (isInvalid('code')) {
+        <p class="field-error">Informe o código.</p>
+      } @else if (isEditing()) {
+        <p class="mt-1 text-xs text-slate-500">O código não pode ser alterado.</p>
+      }
+    </div>
+
+    <div>
+      <label for="pf-unit" class="field-label">Unidade</label>
+      <select id="pf-unit" class="field-input" formControlName="unit">
+        @for (option of unitOptions; track option.value) {
+          <option [value]="option.value">{{ option.label }}</option>
+        }
+      </select>
+      @if (isEditing()) {
+        <p class="mt-1 text-xs text-slate-500">A unidade não pode ser alterada.</p>
+      }
+    </div>
+  </div>
+
+  <div>
+    <label for="pf-name" class="field-label">Nome</label>
+    <input id="pf-name" class="field-input" formControlName="name" maxlength="150" />
+    @if (isInvalid('name')) {
+      <p class="field-error">Informe o nome do produto.</p>
+    }
+  </div>
+
+  <div class="grid gap-4 sm:grid-cols-2">
+    <div>
+      <label for="pf-category" class="field-label">Categoria</label>
+      <select id="pf-category" class="field-input" formControlName="categoryId">
+        <option [ngValue]="null" disabled>Selecione...</option>
+        @for (category of categories(); track category.id) {
+          <option [ngValue]="category.id">{{ category.name }}</option>
+        }
+      </select>
+      @if (isInvalid('categoryId')) {
+        <p class="field-error">Selecione uma categoria.</p>
+      }
+    </div>
+
+    <div>
+      <label for="pf-min" class="field-label">Estoque mínimo</label>
+      <input
+        id="pf-min"
+        type="number"
+        min="0"
+        step="0.001"
+        class="field-input"
+        formControlName="minimumStock"
+      />
+      @if (isInvalid('minimumStock')) {
+        <p class="field-error">Informe um valor maior ou igual a zero.</p>
+      }
+    </div>
+  </div>
+
+  <div>
+    <label for="pf-description" class="field-label">Descrição (opcional)</label>
+    <textarea
+      id="pf-description"
+      rows="3"
+      class="field-input"
+      formControlName="description"
+      maxlength="500"
+    ></textarea>
+  </div>
+
+  <div class="flex justify-end gap-2 pt-2">
+    <button appButton type="button" variant="secondary" (click)="cancelled.emit()">Cancelar</button>
+    <button appButton type="submit" [loading]="saving()">
+      {{ isEditing() ? 'Salvar alterações' : 'Criar produto' }}
+    </button>
+  </div>
+</form>

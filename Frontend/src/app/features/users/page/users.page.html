@@ -1,0 +1,115 @@
+<header class="mb-6 flex flex-wrap items-start justify-between gap-3">
+  <div>
+    <h1 class="text-2xl font-bold">Usuários</h1>
+    <p class="mt-1 text-sm text-slate-600">Gerencie quem acessa o sistema e com qual perfil.</p>
+  </div>
+  <button appButton type="button" (click)="openCreate()">Novo usuário</button>
+</header>
+
+@if (error(); as message) {
+  <div
+    role="alert"
+    class="mb-4 flex items-center justify-between gap-3 rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800"
+  >
+    <span>{{ message }}</span>
+    <button appButton type="button" variant="secondary" size="sm" (click)="load()">
+      Tentar novamente
+    </button>
+  </div>
+}
+
+<section class="card overflow-hidden">
+  <div class="overflow-x-auto">
+    <table class="data-table" [class.opacity-60]="loading()">
+      <thead>
+        <tr>
+          <th scope="col">Nome</th>
+          <th scope="col">E-mail</th>
+          <th scope="col">Perfil</th>
+          <th scope="col">Status</th>
+          <th scope="col">Criado em</th>
+          <th scope="col"><span class="sr-only">Ações</span></th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (user of users(); track user.id) {
+          <tr>
+            <td class="font-medium">
+              {{ user.name }}
+              @if (isSelf(user)) {
+                <span class="ml-1 text-xs text-slate-500">(você)</span>
+              }
+            </td>
+            <td class="text-slate-600">{{ user.email }}</td>
+            <td>{{ roleLabels[user.role] }}</td>
+            <td>
+              <app-badge [tone]="user.isActive ? 'success' : 'neutral'">
+                {{ user.isActive ? 'Ativo' : 'Inativo' }}
+              </app-badge>
+            </td>
+            <td class="text-slate-600">{{ user.createdAt | date: 'dd/MM/yyyy' }}</td>
+            <td class="text-right">
+              <div class="flex justify-end gap-1">
+                <button appButton type="button" variant="ghost" size="sm" (click)="openEdit(user)">
+                  Editar
+                </button>
+                <button
+                  appButton
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  (click)="openPassword(user)"
+                >
+                  Senha
+                </button>
+                @if (!isSelf(user)) {
+                  <button
+                    appButton
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    (click)="askToggle(user)"
+                  >
+                    {{ user.isActive ? 'Desativar' : 'Ativar' }}
+                  </button>
+                }
+              </div>
+            </td>
+          </tr>
+        } @empty {
+          <tr>
+            <td colspan="6" class="py-10 text-center text-slate-500">
+              {{ loading() ? 'Carregando...' : 'Nenhum usuário cadastrado.' }}
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<app-modal [(open)]="formOpen" [title]="editing() ? 'Editar usuário' : 'Novo usuário'">
+  @if (formOpen()) {
+    <app-user-form [user]="editing()" (saved)="onSaved($event)" (cancelled)="formOpen.set(false)" />
+  }
+</app-modal>
+
+<app-modal [(open)]="passwordOpen" title="Redefinir senha">
+  @if (passwordOpen() && passwordTarget(); as target) {
+    <app-reset-password-form
+      [user]="target"
+      (saved)="onPasswordSaved()"
+      (cancelled)="passwordOpen.set(false)"
+    />
+  }
+</app-modal>
+
+<app-confirm-dialog
+  [(open)]="confirmOpen"
+  [title]="confirmTitle()"
+  [message]="confirmMessage()"
+  [confirmLabel]="confirmTarget()?.isActive ? 'Desativar' : 'Ativar'"
+  [variant]="confirmTarget()?.isActive ? 'danger' : 'primary'"
+  [loading]="acting()"
+  (confirmed)="confirmToggle()"
+/>

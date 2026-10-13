@@ -1,0 +1,126 @@
+<form class="card space-y-5 p-6" [formGroup]="form" (ngSubmit)="submit()" novalidate>
+  <fieldset>
+    <legend class="field-label">Tipo de movimentação</legend>
+    <div class="flex flex-wrap gap-2">
+      @for (option of operations(); track option.value) {
+        <button
+          type="button"
+          class="rounded-md border px-3 py-2 text-sm font-medium transition"
+          [class]="operation() === option.value ? activeClass : idleClass"
+          [attr.aria-pressed]="operation() === option.value"
+          (click)="selectOperation(option.value)"
+        >
+          {{ option.label }}
+        </button>
+      }
+    </div>
+    @if (isAdjustment()) {
+      <p class="mt-2 text-xs text-slate-600">
+        Ajustes manuais exigem motivo e justificativa e ficam registrados no histórico.
+      </p>
+    }
+  </fieldset>
+
+  @if (error(); as message) {
+    <div
+      role="alert"
+      class="rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800"
+    >
+      {{ message }}
+    </div>
+  }
+
+  <div class="grid gap-4 sm:grid-cols-2">
+    <div>
+      <label for="mf-product" class="field-label">Produto</label>
+      <select id="mf-product" class="field-input" formControlName="productId">
+        <option [ngValue]="null" disabled>Selecione...</option>
+        @for (product of products(); track product.id) {
+          <option [ngValue]="product.id">{{ product.code }} · {{ product.name }}</option>
+        }
+      </select>
+      @if (isInvalid('productId')) {
+        <p class="field-error">Selecione um produto.</p>
+      }
+      @if (selectedProduct(); as product) {
+        <p class="mt-1 text-xs text-slate-600">
+          Total {{ product.stock.totalQuantity | number: '1.0-3' }} · Reservado
+          {{ product.stock.reservedQuantity | number: '1.0-3' }} ·
+          <strong>Disponível {{ product.stock.availableQuantity | number: '1.0-3' }}</strong>
+          {{ unitLabel(product.unit) }}
+        </p>
+      }
+    </div>
+
+    <div>
+      <label for="mf-quantity" class="field-label">Quantidade</label>
+      <input
+        id="mf-quantity"
+        type="number"
+        min="0"
+        step="0.001"
+        class="field-input"
+        formControlName="quantity"
+      />
+      @if (isInvalid('quantity')) {
+        <p class="field-error">Informe uma quantidade maior que zero.</p>
+      }
+    </div>
+  </div>
+
+  @if (operation() !== 'entry') {
+    <div>
+      <label for="mf-reason" class="field-label">
+        Motivo
+        @if (!isAdjustment()) {
+          <span class="font-normal text-slate-500">(opcional)</span>
+        }
+      </label>
+      <select id="mf-reason" class="field-input" formControlName="reason">
+        <option [ngValue]="null">{{ isAdjustment() ? 'Selecione...' : 'Não informado' }}</option>
+        @for (option of reasonOptions(); track option.value) {
+          <option [ngValue]="option.value">{{ option.label }}</option>
+        }
+      </select>
+      @if (isInvalid('reason')) {
+        <p class="field-error">Informe o motivo do ajuste.</p>
+      }
+    </div>
+  }
+
+  <div>
+    <label for="mf-justification" class="field-label">
+      Justificativa
+      @if (!isAdjustment()) {
+        <span class="font-normal text-slate-500">(opcional)</span>
+      }
+    </label>
+    <textarea
+      id="mf-justification"
+      rows="3"
+      maxlength="500"
+      class="field-input"
+      formControlName="justification"
+    ></textarea>
+    @if (isInvalid('justification')) {
+      <p class="field-error">Informe a justificativa do ajuste.</p>
+    }
+  </div>
+
+  <div>
+    <label for="mf-document" class="field-label">
+      Documento de referência <span class="font-normal text-slate-500">(opcional)</span>
+    </label>
+    <input
+      id="mf-document"
+      class="field-input"
+      maxlength="100"
+      placeholder="Ex.: NF-12345"
+      formControlName="referenceDocument"
+    />
+  </div>
+
+  <div class="flex justify-end">
+    <button appButton type="submit" [loading]="saving()">Registrar movimentação</button>
+  </div>
+</form>

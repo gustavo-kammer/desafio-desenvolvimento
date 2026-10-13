@@ -1,0 +1,39 @@
+<form [formGroup]="form" (ngSubmit)="submit()" class="space-y-4" novalidate>
+  @if (error(); as message) {
+    <div
+      class="rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700"
+      role="alert"
+    >
+      {{ message }}
+    </div>
+  }
+
+  <div>
+    <label for="productId" class="field-label">Produto</label>
+    <select id="productId" formControlName="productId" class="field-input">
+      <option [ngValue]="0" disabled>Selecione um produto</option>
+      @for (product of products(); track product.id) {
+        <option [ngValue]="product.id">
+          {{ product.code }} · {{ product.name }} (disp.: {{ product.stock.availableQuantity }}
+          {{ unitLabels[product.unit] }})
+        </option>
+      }
+    </select>
+    @if (form.controls.productId.touched && form.controls.productId.invalid) {
+      <p class="field-error">Selecione um produto.</p>
+    }
+  </div>
+
+  <div>
+    <label for="quantity" class="field-label">Quantidade</label>
+    <input id="quantity" type="number" step="any" formControlName="quantity" class="field-input" />
+    @if (form.controls.quantity.touched && form.controls.quantity.invalid) {
+      <p class="field-error">Informe uma quantidade maior que zero.</p>
+    }
+  </div>
+
+  <div class="flex justify-end gap-2 pt-2">
+    <button appButton type="button" variant="secondary" (click)="cancel()">Fechar</button>
+    <button appButton type="submit" [loading]="saving()">Reservar</button>
+  </div>
+</form>

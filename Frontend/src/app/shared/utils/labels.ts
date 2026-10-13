@@ -42,3 +42,15 @@ export const RESERVATION_STATUS_LABELS: Record<ReservationStatus, string> = {
   consumed: 'Consumida',
   canceled: 'Cancelada',
 };
+
+export interface IUnitOption {
+  value: UnitOfMeasure;
+  label: string;
+}
+
+export const UNIT_OPTIONS: IUnitOption[] = [
+  { value: 'kg', label: 'Quilograma (kg)' },
+  { value: 'ton', label: 'Tonelada (t)' },
+  { value: 'liter', label: 'Litro (L)' },
+  { value: 'unit', label: 'Unidade (un)' },
+];
