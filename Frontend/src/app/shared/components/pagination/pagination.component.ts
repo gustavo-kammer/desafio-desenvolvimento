@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, input, output } from '@angular/core';
-import { ButtonComponent } from '../components/button/button.component';
+import { ButtonComponent } from '../button/button.component';
 
 @Component({
   selector: 'app-pagination',

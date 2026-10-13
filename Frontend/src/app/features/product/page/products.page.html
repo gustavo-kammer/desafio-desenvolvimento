@@ -1,0 +1,118 @@
+<header class="mb-6">
+  <h1 class="text-2xl font-bold">Produtos</h1>
+  <p class="mt-1 text-sm text-slate-600">Consulte o saldo, as reservas e o estoque disponível.</p>
+</header>
+
+<section class="card mb-4 grid gap-4 p-4 sm:grid-cols-2 lg:grid-cols-4">
+  <div class="lg:col-span-2">
+    <label for="search" class="field-label">Buscar</label>
+    <input
+      id="search"
+      type="search"
+      class="field-input"
+      placeholder="Código ou nome do produto"
+      [formControl]="searchControl"
+    />
+  </div>
+
+  <div>
+    <label for="category" class="field-label">Categoria</label>
+    <select id="category" class="field-input" [formControl]="categoryControl">
+      <option [ngValue]="null">Todas</option>
+      @for (category of categories(); track category.id) {
+        <option [ngValue]="category.id">{{ category.name }}</option>
+      }
+    </select>
+  </div>
+
+  <label class="flex items-end gap-2 pb-2 text-sm font-medium text-slate-800">
+    <input
+      type="checkbox"
+      class="size-4 rounded border-slate-300 accent-brand-600"
+      [formControl]="belowMinimumControl"
+    />
+    Somente abaixo do mínimo
+  </label>
+</section>
+
+@if (error(); as message) {
+  <div
+    role="alert"
+    class="mb-4 flex items-center justify-between gap-3 rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800"
+  >
+    <span>{{ message }}</span>
+    <button appButton type="button" variant="secondary" size="sm" (click)="reload()">
+      Tentar novamente
+    </button>
+  </div>
+}
+
+<section class="card overflow-hidden">
+  <div class="overflow-x-auto">
+    <table class="data-table" [class.opacity-60]="loading()">
+      <thead>
+        <tr>
+          <th scope="col">Código</th>
+          <th scope="col">Produto</th>
+          <th scope="col">Categoria</th>
+          <th scope="col" class="text-right">Total</th>
+          <th scope="col" class="text-right">Reservado</th>
+          <th scope="col" class="text-right">Disponível</th>
+          <th scope="col" class="text-right">Mínimo</th>
+          <th scope="col">Situação</th>
+        </tr>
+      </thead>
+      <tbody>
+        @if (result(); as data) {
+          @for (product of data.items; track product.id) {
+            <tr>
+              <td class="font-mono text-xs">{{ product.code }}</td>
+              <td class="font-medium">{{ product.name }}</td>
+              <td class="text-slate-600">{{ product.category?.name ?? '—' }}</td>
+              <td class="text-right">
+                {{ product.stock.totalQuantity | number: '1.0-3' }} {{ unitLabel(product.unit) }}
+              </td>
+              <td class="text-right">
+                {{ product.stock.reservedQuantity | number: '1.0-3' }}
+              </td>
+              <td class="text-right font-semibold">
+                {{ product.stock.availableQuantity | number: '1.0-3' }}
+              </td>
+              <td class="text-right text-slate-600">
+                {{ product.minimumStock | number: '1.0-3' }}
+              </td>
+              <td>
+                @if (product.belowMinimumStock) {
+                  <app-badge tone="warning">Abaixo do mínimo</app-badge>
+                } @else {
+                  <app-badge tone="success">Regular</app-badge>
+                }
+              </td>
+            </tr>
+          } @empty {
+            <tr>
+              <td colspan="8" class="py-10 text-center text-slate-500">
+                Nenhum produto encontrado.
+              </td>
+            </tr>
+          }
+        } @else if (loading()) {
+          <tr>
+            <td colspan="8" class="py-10 text-center text-slate-500">Carregando...</td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+
+  @if (result(); as data) {
+    <div class="border-t border-slate-200 px-4 py-3">
+      <app-pagination
+        [page]="data.page"
+        [totalPages]="data.totalPages"
+        [totalCount]="data.totalCount"
+        (pageChange)="goToPage($event)"
+      />
+    </div>
+  }
+</section>
