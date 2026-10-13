@@ -1,5 +1,4 @@
-using System.Text.Json;
-using System.Text.Json.Serialization;
+using DotNetEnv;
 using Estoque.API.Errors;
 using Estoque.API.OpenApi;
 using Estoque.API.Security;
@@ -7,6 +6,10 @@ using Estoque.Application;
 using Estoque.Infra.Data;
 using Estoque.Infra.Ioc;
 using Microsoft.AspNetCore.Mvc;
+using System.Text.Json;
+using System.Text.Json.Serialization;
+
+Env.TraversePath().Load();
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -41,6 +44,12 @@ builder.Services.AddApiSecurity(builder.Configuration);
 builder.Services.AddProblemDetails();
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 
+builder.Services.AddCors(options => options.AddDefaultPolicy(policy => policy
+    .WithOrigins(builder.Configuration.GetSection("Cors:Origins").Get<string[]>()
+        ?? ["http://localhost:4200", "http://localhost:5173"])
+    .AllowAnyHeader()
+    .AllowAnyMethod()));
+
 var app = builder.Build();
 
 await app.Services.InitializeDatabaseAsync();
@@ -59,7 +68,10 @@ app.UseSwaggerUI(options =>
 
 app.MapGet("/", () => Results.Redirect("/swagger")).AllowAnonymous().ExcludeFromDescription();
 
-app.UseHttpsRedirection();
+if (!app.Environment.IsDevelopment())
+    app.UseHttpsRedirection();
+
+app.UseCors();
 app.UseAuthentication();
 app.UseAuthorization();
 

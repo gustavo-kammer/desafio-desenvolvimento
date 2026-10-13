@@ -11,7 +11,11 @@ internal sealed class StockMovementRepository(AppDbContext db) : IStockMovementR
 
     public async Task<PagedResult<StockMovement>> ListAsync(StockMovementFilter filter, CancellationToken ct = default)
     {
-        var query = db.StockMovements.AsNoTracking().AsQueryable();
+        var query = db.StockMovements
+            .AsNoTracking()
+            .Include(m => m.Product)
+            .Include(m => m.User)
+            .AsQueryable();
 
         if (filter.ProductId is { } productId)
             query = query.Where(m => m.ProductId == productId);
@@ -44,7 +48,15 @@ internal sealed class StockMovementRepository(AppDbContext db) : IStockMovementR
         return new PagedResult<StockMovement>(items, page, pageSize, total);
     }
 
+    public Task<StockMovement?> GetByIdAsync(int id, CancellationToken ct = default) =>
+        db.StockMovements
+            .AsNoTracking()
+            .Include(m => m.Product)
+            .Include(m => m.User)
+            .FirstOrDefaultAsync(m => m.Id == id, ct);
+
     public void Add(StockMovement movement) => db.StockMovements.Add(movement);
+
     private static DateTime ToUtc(DateTime value) => value.Kind switch
     {
         DateTimeKind.Utc => value,

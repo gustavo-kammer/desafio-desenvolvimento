@@ -16,3 +16,7 @@ public sealed record UpdateProductRequest(
     [Required, StringLength(150, MinimumLength = 1)] string Name,
     decimal MinimumStock,
     [StringLength(500)] string? Description = null);
+
+public sealed record SaveCategoryRequest(
+    [Required, StringLength(120, MinimumLength = 1)] string Name,
+    [StringLength(500)] string? Description = null);

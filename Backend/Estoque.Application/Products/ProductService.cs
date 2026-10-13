@@ -70,6 +70,36 @@ public sealed class ProductService(
         return list.Select(CategoryDto.From).ToList();
     }
 
+    public async Task<CategoryDto> CreateCategoryAsync(SaveCategoryRequest request, CancellationToken ct = default)
+    {
+        await EnsureCategoryNameIsFreeAsync(request.Name, null, ct);
+
+        var category = new ProductCategory(request.Name, request.Description);
+        categories.Add(category);
+        await unitOfWork.CommitAsync(ct);
+
+        return CategoryDto.From(category);
+    }
+
+    public async Task<CategoryDto> UpdateCategoryAsync(int id, SaveCategoryRequest request, CancellationToken ct = default)
+    {
+        var category = await categories.GetByIdAsync(id, ct)
+            ?? throw new NotFoundException($"Categoria {id} não encontrada.");
+
+        await EnsureCategoryNameIsFreeAsync(request.Name, id, ct);
+
+        category.Update(request.Name, request.Description);
+        await unitOfWork.CommitAsync(ct);
+
+        return CategoryDto.From(category);
+    }
+
+    private async Task EnsureCategoryNameIsFreeAsync(string name, int? ignoreId, CancellationToken ct)
+    {
+        if (await categories.NameExistsAsync(name, ignoreId, ct))
+            throw new ConflictException($"Já existe uma categoria com o nome '{name.Trim()}'.");
+    }
+
     private async Task<Product> GetOrThrowAsync(int id, CancellationToken ct) =>
         await products.GetByIdAsync(id, ct)
             ?? throw new NotFoundException($"Produto {id} não encontrado.");

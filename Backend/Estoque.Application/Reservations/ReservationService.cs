@@ -24,7 +24,7 @@ public sealed class ReservationService(
         reservations.Add(reservation);
 
         await unitOfWork.CommitAsync(ct);
-        return ReservationDto.From(reservation);
+        return await ToDtoAsync(reservation, ct);
     }
 
     public Task<ReservationDto> CancelAsync(int reservationId, CancellationToken ct = default) =>
@@ -52,7 +52,7 @@ public sealed class ReservationService(
         RegisterMovement(type, product.Stock, reservation, stockOperation(product.Stock));
 
         await unitOfWork.CommitAsync(ct);
-        return ReservationDto.From(reservation);
+        return await ToDtoAsync(reservation, ct);
     }
 
     private void RegisterMovement(MovementType type, Stock stock, Reservation reservation, Action<decimal> apply)
@@ -70,7 +70,15 @@ public sealed class ReservationService(
             reservation: reservation));
     }
 
+    public async Task<IReadOnlyList<ReservationDto>> ListAsync(
+    ReservationStatus? status, int? productId, CancellationToken ct = default) =>
+    (await reservations.ListAsync(status, productId, ct)).Select(ReservationDto.From).ToList();
+
     private async Task<Product> GetProductAsync(int productId, CancellationToken ct) =>
         await products.GetByIdAsync(productId, ct)
             ?? throw new NotFoundException($"Produto {productId} não encontrado.");
+
+    private async Task<ReservationDto> ToDtoAsync(Reservation reservation, CancellationToken ct) =>
+    ReservationDto.From(await reservations.GetDetailedAsync(reservation.Id, ct) ?? reservation);
+
 }

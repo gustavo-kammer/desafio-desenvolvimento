@@ -20,7 +20,8 @@ public sealed class StockMovementService(
 
         await unitOfWork.CommitAsync(ct);
 
-        return StockMovementDto.From(movement);
+        var saved = await movements.GetByIdAsync(movement.Id, ct) ?? movement;
+        return StockMovementDto.From(saved);
     }
 
     public async Task<PagedResult<StockMovementDto>> ListAsync(

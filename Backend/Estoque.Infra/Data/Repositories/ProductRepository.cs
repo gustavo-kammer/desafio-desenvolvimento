@@ -12,14 +12,14 @@ internal sealed class ProductRepository(AppDbContext db) : IProductRepository
     private IQueryable<Product> Active => db.Products.Where(p => p.ArchivedAt == null);
 
     public Task<Product?> GetByIdAsync(int id, CancellationToken ct = default) =>
-        Active.Include(p => p.Stock).FirstOrDefaultAsync(p => p.Id == id, ct);
+        Active.Include(p => p.Stock).Include(p => p.Category).FirstOrDefaultAsync(p => p.Id == id, ct);
 
     public Task<bool> CodeExistsAsync(string code, CancellationToken ct = default) =>
         db.Products.AnyAsync(p => p.Code == code, ct);
 
     public async Task<PagedResult<Product>> ListAsync(ProductFilter filter, CancellationToken ct = default)
     {
-        var query = Active.AsNoTracking().Include(p => p.Stock).AsQueryable();
+        var query = Active.AsNoTracking().Include(p => p.Stock).Include(p => p.Category).AsQueryable();
 
         if (!string.IsNullOrWhiteSpace(filter.Search))
         {

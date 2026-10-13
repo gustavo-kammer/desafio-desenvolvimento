@@ -11,4 +11,6 @@ public interface IProductService
     Task<ProductDto> GetAsync(int id, CancellationToken ct = default);
     Task<PagedResult<ProductDto>> ListAsync(ProductFilter filter, CancellationToken ct = default);
     Task<IReadOnlyList<CategoryDto>> ListCategoriesAsync(CancellationToken ct = default);
+    Task<CategoryDto> CreateCategoryAsync(SaveCategoryRequest request, CancellationToken ct = default);
+    Task<CategoryDto> UpdateCategoryAsync(int id, SaveCategoryRequest request, CancellationToken ct = default);
 }

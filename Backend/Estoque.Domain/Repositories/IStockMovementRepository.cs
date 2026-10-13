@@ -7,6 +7,7 @@ namespace Estoque.Domain.Repositories;
 public interface IStockMovementRepository
 {
     Task<PagedResult<StockMovement>> ListAsync(StockMovementFilter filter, CancellationToken ct = default);
+    Task<StockMovement?> GetByIdAsync(int id, CancellationToken ct = default);
     void Add(StockMovement movement);
 }
 
