@@ -37,6 +37,7 @@ public class Product
     public Stock Stock { get; private set; } = null!;
 
     public bool IsArchived => ArchivedAt.HasValue;
+    public bool IsBelowMinimumStock => Stock.AvailableQuantity < MinimumStock;
 
 
     public void Update(int categoryId, string name, string? description, decimal minimumStock)
