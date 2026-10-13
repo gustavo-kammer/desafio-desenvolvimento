@@ -8,10 +8,10 @@ namespace Estoque.API.Controllers;
 
 [ApiController]
 [Route("api/reservations")]
+[Authorize]
 public sealed class ReservationsController(IReservationService reservations) : ControllerBase
 {
     [HttpGet]
-    [Authorize]
     public async Task<ActionResult<IReadOnlyList<ReservationDto>>> List(
         [FromQuery] ReservationStatus? status, [FromQuery] int? productId, CancellationToken ct) =>
         Ok(await reservations.ListAsync(status, productId, ct));
