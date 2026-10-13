@@ -14,4 +14,7 @@ public static class ErrorCodes
     public const string AdjustmentRequiresJustification = "adjustment_requires_justification";
     public const string ProductHasStock = "product_has_stock";
     public const string ProductHasActiveReservations = "product_has_active_reservations";
+    public const string InvalidCredentials = "invalid_credentials";
+    public const string WeakPassword = "weak_password";
+    public const string CannotChangeOwnAccess = "cannot_change_own_access";
 }
