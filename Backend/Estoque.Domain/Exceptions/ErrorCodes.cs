@@ -12,4 +12,6 @@ public static class ErrorCodes
     public const string ReservationNotActive = "reservation_not_active";
     public const string ReservationRequired = "reservation_required";
     public const string AdjustmentRequiresJustification = "adjustment_requires_justification";
+    public const string ProductHasStock = "product_has_stock";
+    public const string ProductHasActiveReservations = "product_has_active_reservations";
 }
