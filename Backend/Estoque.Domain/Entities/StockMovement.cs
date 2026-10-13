@@ -11,7 +11,7 @@ public class StockMovement
     public StockMovement(
         int productId, MovementType type, decimal quantity, int userId, decimal totalBefore,
         decimal totalAfter, decimal reservedBefore, decimal reservedAfter,
-        int? reservationId = null, MovementReason? reason = null,
+        Reservation? reservation = null, MovementReason? reason = null,
         string? justification = null, string? referenceDocument = null)
     {
         Guard.ValidQuantity(quantity);
@@ -24,12 +24,13 @@ public class StockMovement
         var isReservation = type is MovementType.Reservation
             or MovementType.ReservationCancellation
             or MovementType.ReservationConsumption;
-        if (isReservation && reservationId is null)
+        if (isReservation && reservation is null)
             throw new BusinessRuleException(
                 "Movimentação de reserva exige a reserva associada.", ErrorCodes.ReservationRequired);
 
         ProductId = productId;
-        ReservationId = reservationId;
+        Reservation = reservation;
+        ReservationId = reservation is { Id: > 0 } ? reservation.Id : null;
         Type = type;
         Quantity = quantity;
         TotalBefore = totalBefore;
