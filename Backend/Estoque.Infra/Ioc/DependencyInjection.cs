@@ -1,6 +1,8 @@
-﻿using Estoque.Domain.Repositories;
+﻿using Estoque.Application.Abstractions;
+using Estoque.Domain.Repositories;
 using Estoque.Infra.Data;
 using Estoque.Infra.Data.Repositories;
+using Estoque.Infra.Security;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -24,6 +26,14 @@ public static class DependencyInjection
         services.AddScoped<IStockRepository, StockRepository>();
         services.AddScoped<IReservationRepository, ReservationRepository>();
         services.AddScoped<IStockMovementRepository, StockMovementRepository>();
+
+        services.AddOptions<JwtOptions>()
+    .Bind(configuration.GetSection(JwtOptions.SectionName))
+    .Validate(o => o.Secret.Length >= 32, "Jwt:Secret precisa ter pelo menos 32 caracteres.")
+    .ValidateOnStart();
+
+        services.AddSingleton<IPasswordHasher, BcryptPasswordHasher>();
+        services.AddSingleton<ITokenService, JwtTokenService>();
 
         return services;
     }
