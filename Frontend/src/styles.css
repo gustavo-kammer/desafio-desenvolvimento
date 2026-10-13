@@ -1,0 +1,61 @@
+@import 'tailwindcss';
+
+@theme {
+  --font-sans: 'Montserrat', ui-sans-serif, system-ui, sans-serif;
+
+  --color-brand-50: #e6f4f1;
+  --color-brand-100: #ccebe4;
+  --color-brand-200: #99d5c9;
+  --color-brand-300: #66bfae;
+  --color-brand-400: #33aa94;
+  --color-brand-500: #009579;
+  --color-brand-600: #007f67;
+  --color-brand-700: #006855;
+  --color-brand-800: #005243;
+  --color-brand-900: #003c30;
+
+  --color-ink: #000000;
+  --color-surface: #f3f4f4;
+}
+
+body {
+  margin: 0;
+  background-color: var(--color-surface);
+  color: #111111;
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+@layer components {
+  .field-label {
+    @apply mb-1 block text-sm font-medium text-slate-800;
+  }
+
+  .field-input {
+    @apply block w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm placeholder:text-slate-400 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/30 focus:outline-none disabled:bg-slate-100;
+  }
+
+  .field-error {
+    @apply mt-1 text-xs text-red-700;
+  }
+
+  .card {
+    @apply rounded-lg border border-slate-200 bg-white shadow-sm;
+  }
+
+  .data-table {
+    @apply w-full text-left text-sm;
+  }
+
+  .data-table th {
+    @apply border-b border-slate-200 bg-slate-50 px-4 py-3 text-xs font-semibold tracking-wide text-slate-600 uppercase;
+  }
+
+  .data-table td {
+    @apply border-b border-slate-100 px-4 py-3 align-middle;
+  }
+
+  .data-table tbody tr:hover {
+    @apply bg-slate-50;
+  }
+}

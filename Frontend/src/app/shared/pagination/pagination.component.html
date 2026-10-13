@@ -1,0 +1,33 @@
+@if (totalCount() > 0) {
+  <nav
+    class="flex flex-wrap items-center justify-between gap-3 text-sm text-slate-600"
+    aria-label="Paginação"
+  >
+    <p>
+      Página <strong>{{ page() }}</strong> de <strong>{{ totalPages() }}</strong> ·
+      {{ totalCount() }} registro(s)
+    </p>
+    <div class="flex gap-2">
+      <button
+        appButton
+        type="button"
+        variant="secondary"
+        size="sm"
+        [disabled]="page() <= 1"
+        (click)="go(page() - 1)"
+      >
+        Anterior
+      </button>
+      <button
+        appButton
+        type="button"
+        variant="secondary"
+        size="sm"
+        [disabled]="page() >= totalPages()"
+        (click)="go(page() + 1)"
+      >
+        Próxima
+      </button>
+    </div>
+  </nav>
+}
