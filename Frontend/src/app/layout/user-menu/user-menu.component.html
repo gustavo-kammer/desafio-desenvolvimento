@@ -1,0 +1,87 @@
+<div class="relative">
+  <button
+    #trigger
+    type="button"
+    class="flex items-center gap-3 rounded-full p-1 transition hover:bg-slate-100 focus-visible:ring-2 focus-visible:ring-brand-primary focus-visible:outline-none md:pr-3"
+    aria-controls="user-menu-panel"
+    aria-haspopup="true"
+    [attr.aria-expanded]="open()"
+    [attr.aria-label]="'Menu do usuário: ' + user().name"
+    (click)="toggle()"
+  >
+    <span
+      class="flex size-9 items-center justify-center rounded-full bg-brand-primary text-sm font-bold text-white"
+      aria-hidden="true"
+    >
+      {{ initials() }}
+    </span>
+
+    <span class="hidden text-left leading-tight md:block">
+      <span class="block max-w-44 truncate text-sm font-semibold text-text-strong">
+        {{ user().name }}
+      </span>
+      <span class="block text-xs text-text-muted">{{ roleLabel() }}</span>
+    </span>
+
+    <svg
+      viewBox="0 0 24 24"
+      class="hidden size-4 text-text-muted transition-transform md:block"
+      [class.rotate-180]="open()"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="2"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      aria-hidden="true"
+    >
+      <path d="m6 9 6 6 6-6" />
+    </svg>
+  </button>
+
+  @if (open()) {
+    <div
+      id="user-menu-panel"
+      class="absolute right-0 z-50 mt-2 w-72 rounded-lg border border-line bg-white p-1 shadow-lg"
+    >
+      <div class="flex items-center gap-3 px-3 py-3">
+        <span
+          class="flex size-11 shrink-0 items-center justify-center rounded-full bg-brand-primary text-base font-bold text-white"
+          aria-hidden="true"
+        >
+          {{ initials() }}
+        </span>
+        <div class="min-w-0">
+          <p class="truncate text-sm font-semibold text-text-strong">{{ user().name }}</p>
+          <p class="truncate text-xs text-text-muted">{{ user().email }}</p>
+          <div class="mt-1.5">
+            <app-badge tone="success">{{ roleLabel() }}</app-badge>
+          </div>
+        </div>
+      </div>
+
+      <div class="my-1 border-t border-line"></div>
+
+      <button
+        type="button"
+        class="flex w-full items-center gap-2 rounded-md px-3 py-2.5 text-sm font-medium text-text-strong transition hover:bg-slate-100 focus-visible:ring-2 focus-visible:ring-brand-primary focus-visible:outline-none"
+        (click)="confirmSignOut()"
+      >
+        <svg
+          viewBox="0 0 24 24"
+          class="size-4"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          aria-hidden="true"
+        >
+          <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+          <path d="m16 17 5-5-5-5" />
+          <path d="M21 12H9" />
+        </svg>
+        Sair
+      </button>
+    </div>
+  }
+</div>

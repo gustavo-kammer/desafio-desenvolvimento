@@ -1,84 +1,106 @@
-<main class="grid min-h-screen lg:grid-cols-2">
-  <section class="hidden flex-col justify-between bg-ink p-12 text-white lg:flex">
-    <div class="flex items-center gap-3">
-      <span class="h-8 w-2 rounded-full bg-brand-500"></span>
-      <span class="text-lg font-semibold tracking-wide">Estoque</span>
-    </div>
+<app-auth-layout>
+  <div class="mt-12">
+    <h1 class="title-caps mt-2 text-3xl text-text-strong">Entrar</h1>
+    <p class="mt-1 text-base text-text-muted">Acesso restrito a colaboradores.</p>
+  </div>
+
+  <form class="mt-8" [formGroup]="form" (ngSubmit)="submit()" novalidate>
+    @let email = form.controls.email;
+    @let password = form.controls.password;
+    @let emailInvalid = isInvalid(email);
+    @let passwordInvalid = isInvalid(password);
 
     <div>
-      <h1 class="max-w-md text-4xl leading-tight font-bold">
-        Controle de estoque e produtos em um só lugar.
-      </h1>
-      <p class="mt-4 max-w-md text-white/70">
-        Entradas, saídas, reservas e o histórico completo de cada movimentação, com o responsável
-        registrado.
-      </p>
+      <label for="email" class="field-label mb-2">E-mail</label>
+      <input
+        #emailInput
+        id="email"
+        type="email"
+        formControlName="email"
+        autocomplete="username"
+        placeholder="nome@example.com"
+        class="field-input h-12 rounded-lg text-base"
+        [attr.aria-invalid]="emailInvalid"
+        [attr.aria-describedby]="emailInvalid ? 'email-error' : null"
+      />
+      @if (emailInvalid) {
+        <p id="email-error" class="field-error">
+          {{ email.hasError('required') ? 'Informe o e-mail.' : 'Informe um e-mail válido.' }}
+        </p>
+      }
     </div>
 
-    <p class="text-sm text-white/50">Sistema de gerenciamento de estoque</p>
-  </section>
-
-  <section class="flex items-center justify-center p-6 sm:p-12">
-    <form class="w-full max-w-sm" [formGroup]="form" (ngSubmit)="submit()" novalidate>
-      <div class="mb-8 flex items-center gap-3 lg:hidden">
-        <span class="h-8 w-2 rounded-full bg-brand-500"></span>
-        <span class="text-lg font-semibold tracking-wide">Estoque</span>
-      </div>
-
-      <h2 class="text-2xl font-bold">Entrar</h2>
-      <p class="mt-1 text-sm text-slate-600">Use seu e-mail e senha para acessar o sistema.</p>
-
-      @if (error(); as message) {
-        <div
-          role="alert"
-          class="mt-6 rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800"
-        >
-          {{ message }}
-        </div>
-      }
-
-      <div class="mt-6">
-        <label for="email" class="field-label">E-mail</label>
+    <div class="mt-5">
+      <label for="password" class="field-label mb-2">Senha</label>
+      <div class="relative">
         <input
-          id="email"
-          type="email"
-          formControlName="email"
-          autocomplete="username"
-          class="field-input"
-          [attr.aria-invalid]="form.controls.email.touched && form.controls.email.invalid"
+          id="password"
+          [type]="showPassword() ? 'text' : 'password'"
+          formControlName="password"
+          autocomplete="current-password"
+          placeholder="Informe sua senha"
+          class="field-input h-12 rounded-lg pr-12 text-base"
+          [attr.aria-invalid]="passwordInvalid"
+          [attr.aria-describedby]="passwordInvalid ? 'password-error' : null"
         />
-        @if (form.controls.email.touched && form.controls.email.invalid) {
-          <p class="field-error">Informe um e-mail válido.</p>
-        }
-      </div>
-
-      <div class="mt-4">
-        <label for="password" class="field-label">Senha</label>
-        <div class="relative">
-          <input
-            id="password"
-            [type]="showPassword() ? 'text' : 'password'"
-            formControlName="password"
-            autocomplete="current-password"
-            class="field-input pr-20"
-            [attr.aria-invalid]="form.controls.password.touched && form.controls.password.invalid"
-          />
-          <button
-            type="button"
-            class="absolute inset-y-0 right-0 px-3 text-xs font-medium text-brand-700 hover:text-brand-900"
-            (click)="togglePassword()"
+        <button
+          type="button"
+          class="absolute top-1/2 right-0.5 flex size-11 -translate-y-1/2 items-center justify-center rounded-md text-text-muted hover:text-brand-primary-hover focus-visible:ring-2 focus-visible:ring-brand-primary focus-visible:outline-none"
+          aria-controls="password"
+          aria-label="Mostrar senha"
+          [attr.aria-pressed]="showPassword()"
+          (mousedown)="$event.preventDefault()"
+          (click)="togglePassword()"
+        >
+          <svg
+            viewBox="0 0 24 24"
+            class="size-5"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            aria-hidden="true"
           >
-            {{ showPassword() ? 'Ocultar' : 'Mostrar' }}
-          </button>
-        </div>
-        @if (form.controls.password.touched && form.controls.password.invalid) {
-          <p class="field-error">Informe a senha.</p>
-        }
+            @if (showPassword()) {
+              <path
+                d="M10.7 5.1A10.4 10.4 0 0 1 12 5c7 0 10 7 10 7a13.2 13.2 0 0 1-1.7 2.7M6.6 6.6A13.5 13.5 0 0 0 2 12s3 7 10 7a9.7 9.7 0 0 0 5.4-1.6M9.9 9.9a3 3 0 0 0 4.2 4.2M2 2l20 20"
+              />
+            } @else {
+              <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z" />
+              <circle cx="12" cy="12" r="3" />
+            }
+          </svg>
+        </button>
       </div>
+      @if (passwordInvalid) {
+        <p id="password-error" class="field-error">Informe a senha.</p>
+      }
+    </div>
 
-      <button appButton type="submit" class="mt-6 w-full" [loading]="loading()">
-        {{ loading() ? 'Entrando...' : 'Entrar' }}
-      </button>
-    </form>
-  </section>
-</main>
+    <div class="mt-3 flex flex-wrap items-center justify-between gap-x-4">
+      <label class="-my-3 flex min-h-11 cursor-pointer items-center gap-2 text-sm text-text-strong">
+        <input
+          type="checkbox"
+          formControlName="remember"
+          class="size-5 cursor-pointer rounded-sm accent-brand-primary focus-visible:ring-2 focus-visible:ring-brand-primary focus-visible:ring-offset-2 focus-visible:outline-none"
+        />
+        Manter conectado
+      </label>
+      <a
+        routerLink="/esqueci-senha"
+        class="-my-3 inline-flex min-h-11 items-center rounded-sm text-sm font-medium text-brand-primary-hover underline-offset-2 hover:text-brand-900 hover:underline focus-visible:ring-2 focus-visible:ring-brand-primary focus-visible:ring-offset-2 focus-visible:outline-none"
+      >
+        Esqueci minha senha
+      </a>
+    </div>
+
+    @if (error(); as message) {
+      <app-alert class="mt-6">{{ message }}</app-alert>
+    }
+
+    <button appButton type="submit" size="lg" class="mt-12 w-full" [loading]="loading()">
+      {{ loading() ? 'Entrando...' : 'Entrar' }}
+    </button>
+  </form>
+</app-auth-layout>

@@ -1,27 +1,54 @@
-<header class="mb-6 flex flex-wrap items-start justify-between gap-3">
-  <div>
-    <h1 class="text-2xl font-bold">Usuários</h1>
-    <p class="mt-1 text-sm text-slate-600">Gerencie quem acessa o sistema e com qual perfil.</p>
-  </div>
-  <button appButton type="button" (click)="openCreate()">Novo usuário</button>
-</header>
+<app-page-header heading="Usuários" subtitle="Gerencie quem acessa o sistema e com qual perfil.">
+  <button appButton type="button" variant="add" (click)="openCreate()">Novo usuário</button>
+</app-page-header>
 
 @if (error(); as message) {
-  <div
-    role="alert"
-    class="mb-4 flex items-center justify-between gap-3 rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800"
-  >
-    <span>{{ message }}</span>
-    <button appButton type="button" variant="secondary" size="sm" (click)="load()">
+  <app-alert class="mb-4 shrink-0">
+    {{ message }}
+    <button alertAction appButton type="button" variant="secondary" size="sm" (click)="load()">
       Tentar novamente
     </button>
-  </div>
+  </app-alert>
 }
 
-<section class="card overflow-hidden">
-  <div class="overflow-x-auto">
-    <table class="data-table" [class.opacity-60]="loading()">
-      <thead>
+<section class="card flex min-h-96 flex-1 flex-col overflow-hidden">
+  <div class="flex shrink-0 flex-wrap items-center gap-3 border-b border-line p-4">
+    <app-search-field
+      inputId="user-search"
+      label="Buscar usuário"
+      placeholder="Buscar por nome ou e-mail"
+      [control]="searchControl"
+    />
+
+    <div class="w-full sm:w-48">
+      <label for="user-role" class="sr-only">Perfil</label>
+      <select id="user-role" class="field-input h-10" [formControl]="roleControl">
+        <option value="">Todos os perfis</option>
+        @for (role of roles; track role) {
+          <option [value]="role">{{ roleLabels[role] }}</option>
+        }
+      </select>
+    </div>
+
+    <div class="w-full sm:w-44">
+      <label for="user-status" class="sr-only">Status</label>
+      <select id="user-status" class="field-input h-10" [formControl]="statusControl">
+        <option value="">Todos os status</option>
+        <option value="active">Ativo</option>
+        <option value="inactive">Inativo</option>
+      </select>
+    </div>
+
+    @if (hasFilters()) {
+      <button appButton type="button" variant="ghost" size="sm" (click)="clearFilters()">
+        Limpar filtros
+      </button>
+    }
+  </div>
+
+  <div class="min-h-0 flex-1 overflow-auto">
+    <table class="data-table min-w-200" [class.opacity-60]="loading()">
+      <thead class="sticky top-0 z-10">
         <tr>
           <th scope="col">Nome</th>
           <th scope="col">E-mail</th>
@@ -32,59 +59,57 @@
         </tr>
       </thead>
       <tbody>
-        @for (user of users(); track user.id) {
+        @for (user of filtered(); track user.id) {
           <tr>
             <td class="font-medium">
               {{ user.name }}
               @if (isSelf(user)) {
-                <span class="ml-1 text-xs text-slate-500">(você)</span>
+                <span class="ml-1 text-xs font-normal text-text-subtle">(você)</span>
               }
             </td>
-            <td class="text-slate-600">{{ user.email }}</td>
+            <td class="text-text-muted">{{ user.email }}</td>
             <td>{{ roleLabels[user.role] }}</td>
             <td>
               <app-badge [tone]="user.isActive ? 'success' : 'neutral'">
                 {{ user.isActive ? 'Ativo' : 'Inativo' }}
               </app-badge>
             </td>
-            <td class="text-slate-600">{{ user.createdAt | date: 'dd/MM/yyyy' }}</td>
-            <td class="text-right">
-              <div class="flex justify-end gap-1">
-                <button appButton type="button" variant="ghost" size="sm" (click)="openEdit(user)">
-                  Editar
+            <td class="whitespace-nowrap text-text-muted">
+              {{ user.createdAt | date: 'dd/MM/yyyy' }}
+            </td>
+            <td class="text-right whitespace-nowrap">
+              <button appButton type="button" variant="ghost" size="sm" (click)="openEdit(user)">
+                Editar
+              </button>
+              <button
+                appButton
+                type="button"
+                variant="ghost"
+                size="sm"
+                (click)="openPassword(user)"
+              >
+                Senha
+              </button>
+              @if (!isSelf(user)) {
+                <button appButton type="button" variant="ghost" size="sm" (click)="askToggle(user)">
+                  {{ user.isActive ? 'Desativar' : 'Ativar' }}
                 </button>
-                <button
-                  appButton
-                  type="button"
-                  variant="ghost"
-                  size="sm"
-                  (click)="openPassword(user)"
-                >
-                  Senha
-                </button>
-                @if (!isSelf(user)) {
-                  <button
-                    appButton
-                    type="button"
-                    variant="ghost"
-                    size="sm"
-                    (click)="askToggle(user)"
-                  >
-                    {{ user.isActive ? 'Desativar' : 'Ativar' }}
-                  </button>
-                }
-              </div>
+              }
             </td>
           </tr>
         } @empty {
           <tr>
-            <td colspan="6" class="py-10 text-center text-slate-500">
-              {{ loading() ? 'Carregando...' : 'Nenhum usuário cadastrado.' }}
+            <td colspan="6" class="py-16 text-center text-text-muted">
+              {{ loading() ? 'Carregando...' : 'Nenhum usuário encontrado.' }}
             </td>
           </tr>
         }
       </tbody>
     </table>
+  </div>
+
+  <div class="shrink-0 border-t border-line px-4 py-3 text-sm text-text-muted">
+    {{ filtered().length }} usuário(s)
   </div>
 </section>
 

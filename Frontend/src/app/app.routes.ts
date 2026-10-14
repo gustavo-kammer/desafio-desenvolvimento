@@ -8,6 +8,14 @@ export const routes: Routes = [
     loadComponent: () => import('./features/login/page/login.page').then((m) => m.LoginPage),
   },
   {
+    path: 'esqueci-senha',
+    canActivate: [guestGuard],
+    loadComponent: () =>
+      import('./features/forgot-password/page/forgot-password.page').then(
+        (m) => m.ForgotPasswordPage,
+      ),
+  },
+  {
     path: '',
     canActivate: [authGuard],
     loadComponent: () => import('./layout/shell/shell.component').then((m) => m.ShellComponent),
@@ -27,6 +35,11 @@ export const routes: Routes = [
         path: 'reservas',
         loadComponent: () =>
           import('./features/reservations/page/reservations.page').then((m) => m.ReservationsPage),
+      },
+      {
+        path: 'analise',
+        loadComponent: () =>
+          import('./features/analytics/page/analytics.page').then((m) => m.AnalyticsPage),
       },
       {
         path: 'categorias',

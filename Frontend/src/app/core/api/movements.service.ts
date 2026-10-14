@@ -8,6 +8,7 @@ export type MovementOperation = 'entry' | 'exit' | 'adjustmentIn' | 'adjustmentO
 
 export interface IMovementFilter {
   productId?: number | null;
+  userId?: number | null;
   type?: MovementType | null;
   from?: string | null;
   to?: string | null;
@@ -32,6 +33,9 @@ export class MovementsService {
 
     if (typeof filter.productId === 'number') {
       params = params.set('productId', filter.productId);
+    }
+    if (typeof filter.userId === 'number') {
+      params = params.set('userId', filter.userId);
     }
     if (filter.type) {
       params = params.set('type', filter.type);

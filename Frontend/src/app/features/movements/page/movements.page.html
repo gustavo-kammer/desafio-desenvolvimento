@@ -1,43 +1,21 @@
-<header class="mb-6">
-  <h1 class="text-2xl font-bold">Movimentações</h1>
-  <p class="mt-1 text-sm text-slate-600">
-    Registre entradas, saídas e ajustes e consulte o histórico completo.
-  </p>
-</header>
+<app-page-header
+  heading="Movimentações"
+  subtitle="Consulte o histórico completo de entradas, saídas, reservas e ajustes."
+>
+  @if (canRegister()) {
+    <button appButton type="button" variant="add" (click)="openRegister()">Registrar</button>
+  }
+</app-page-header>
 
-@if (canRegister()) {
-  <div class="mb-6 flex gap-6 border-b border-slate-200" role="tablist">
-    <button
-      type="button"
-      role="tab"
-      class="-mb-px border-b-2 px-1 py-3 text-sm font-semibold transition"
-      [class]="tab() === 'history' ? activeTabClass : idleTabClass"
-      [attr.aria-selected]="tab() === 'history'"
-      (click)="selectTab('history')"
-    >
-      Histórico
-    </button>
-    <button
-      type="button"
-      role="tab"
-      class="-mb-px border-b-2 px-1 py-3 text-sm font-semibold transition"
-      [class]="tab() === 'register' ? activeTabClass : idleTabClass"
-      [attr.aria-selected]="tab() === 'register'"
-      (click)="selectTab('register')"
-    >
-      Registrar
-    </button>
-  </div>
-}
+<app-movement-history [products]="products()" />
 
-@if (tab() === 'register' && canRegister()) {
-  <div class="max-w-3xl">
+<app-modal [(open)]="formOpen" title="Registrar movimentação" size="lg">
+  @if (formOpen()) {
     <app-movement-form
       [products]="products()"
       [canAdjust]="canAdjust()"
       (registered)="onRegistered($event)"
+      (cancelled)="formOpen.set(false)"
     />
-  </div>
-} @else {
-  <app-movement-history [products]="products()" />
-}
+  }
+</app-modal>

@@ -1,59 +1,43 @@
-# Frontend
+# Estoque — Front-end (Angular)
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 21.2.6.
+Interface do sistema de estoque e produtos. A visão geral do projeto, a arquitetura e a API estão no [README da raiz](../README.md).
 
-## Development server
+## Stack
 
-To start a local development server, run:
+Angular 21 (standalone, signals, OnPush, formulários reativos), Tailwind CSS 4 e Montserrat. Identidade visual: verde `#009579` e preto.
 
-```bash
-ng serve
-```
-
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
-
-## Code scaffolding
-
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
+## Como executar
 
 ```bash
-ng generate component component-name
+npm install
+npm start        # http://localhost:4200
 ```
 
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
+A API precisa estar no ar. Em desenvolvimento o front consome `http://localhost:5046/api` (`src/environments/environment.development.ts`); em produção usa `/api`. Usuário inicial: `admin@estoque.com` / `Admin@12345`.
 
-```bash
-ng generate --help
+## Scripts
+
+| Comando          | O que faz                                |
+| ---------------- | ---------------------------------------- |
+| `npm start`      | Servidor de desenvolvimento              |
+| `npm run build`  | Build de produção                        |
+| `npm test`       | Testes unitários (Vitest, via `ng test`) |
+| `npx eslint src` | Lint (TypeScript e templates, com a11y)  |
+
+## Estrutura
+
+```
+src/app/
+├── core/       API (serviços HTTP), autenticação (guards, interceptor), modelos
+├── layout/     Shell (sidebar + header) e menu do usuário
+├── shared/     Componentes, pipes e utilitários reutilizáveis
+└── features/   Telas por domínio: login, products, movements, reservations, categories, users
 ```
 
-## Building
+Componentes compartilhados: `app-alert`, `app-page-header`, `app-search-field`, `app-form-actions`, `app-chart` (Chart.js), `app-modal`, `app-confirm-dialog`, `app-pagination`, `app-badge`, `app-toast` e o botão `appButton` (variantes `primary`, `add`, `secondary`, `ghost`, `danger`). Pipes: `quantity` e `unitLabel`.
 
-To build the project run:
+## Convenções
 
-```bash
-ng build
-```
-
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
-
-## Running unit tests
-
-To execute unit tests with the [Vitest](https://vitest.dev/) test runner, use the following command:
-
-```bash
-ng test
-```
-
-## Running end-to-end tests
-
-For end-to-end (e2e) testing, run:
-
-```bash
-ng e2e
-```
-
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
-
-## Additional Resources
-
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+- Modificadores de acesso explícitos, tipos de retorno explícitos, interfaces com prefixo `I` e campos privados com `_` (impostos pelo ESLint).
+- Tokens de cor em `src/styles.css` (`brand-*`, `text-muted`, `danger*`, `line`); evite cores cruas nos templates.
+- Permissões por perfil (Administrador, Operador, Consultor) refletem as políticas da API; a API continua sendo a fonte da verdade.

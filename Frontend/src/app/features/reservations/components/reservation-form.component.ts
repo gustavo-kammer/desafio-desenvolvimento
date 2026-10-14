@@ -15,13 +15,15 @@ import { ProductsService } from '../../../core/api/products.service';
 import { errorMessage } from '../../../core/api/api-error';
 import { ReservationsService } from '../../../core/api/reservations.service';
 import { IPagedResult, IProduct, IReservation } from '../../../core/models/api.models';
-import { ButtonComponent } from '../../../shared/components/button/button.component';
 import { ToastService } from '../../../shared/components/toast/toast.service';
-import { UNIT_LABELS } from '../../../shared/utils/labels';
+import { AlertComponent } from '../../../shared/components/alert/alert.component';
+import { FormActionsComponent } from '../../../shared/components/form-actions/form-actions.component';
+import { QuantityPipe } from '../../../shared/pipes/quantity.pipe';
+import { isFieldInvalid } from '../../../shared/utils/forms';
 
 @Component({
   selector: 'app-reservation-form',
-  imports: [ReactiveFormsModule, ButtonComponent],
+  imports: [QuantityPipe, FormActionsComponent, AlertComponent, ReactiveFormsModule],
   templateUrl: './reservation-form.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -34,7 +36,6 @@ export class ReservationFormComponent {
   public readonly saved = output<IReservation>();
   public readonly cancelled = output<void>();
 
-  protected readonly unitLabels = UNIT_LABELS;
   protected readonly saving = signal<boolean>(false);
   protected readonly error = signal<string | null>(null);
 
@@ -45,6 +46,8 @@ export class ReservationFormComponent {
     ),
     { initialValue: [] },
   );
+  protected readonly isInvalid = isFieldInvalid;
+
   protected readonly form = this._fb.nonNullable.group({
     productId: [0, [Validators.min(1)]],
     quantity: [1, [Validators.required, Validators.min(0.001)]],

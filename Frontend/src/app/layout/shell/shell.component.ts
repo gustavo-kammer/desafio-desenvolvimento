@@ -8,16 +8,14 @@ import {
 } from '@angular/core';
 import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { AuthService } from '../../core/auth/auth.service';
-import { IUser, UserRole } from '../../core/models/api.models';
-import { BadgeComponent } from '../../shared/components/badge/badge.component';
-import { ButtonComponent } from '../../shared/components/button/button.component';
-import { ROLE_LABELS } from '../../shared/utils/labels';
+import { IUser } from '../../core/models/api.models';
 import { INavItem, NAV_ITEMS } from '../nav-items';
+import { UserMenuComponent } from '../user-menu/user-menu.component';
 
 @Component({
   selector: 'app-shell',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [RouterOutlet, RouterLink, RouterLinkActive, BadgeComponent, ButtonComponent],
+  imports: [RouterOutlet, RouterLink, RouterLinkActive, UserMenuComponent],
   templateUrl: './shell.component.html',
 })
 export class ShellComponent {
@@ -30,13 +28,10 @@ export class ShellComponent {
     NAV_ITEMS.filter((item: INavItem) => !item.roles || this._auth.hasRole(...item.roles)),
   );
 
-  protected readonly activeLinkClass: string = 'border-brand-500 bg-white/10 text-white';
+  protected readonly activeLinkClass: string =
+    'border-brand-primary bg-brand-50 font-semibold text-brand-800';
   protected readonly idleLinkClass: string =
-    'border-transparent text-white/70 hover:bg-white/5 hover:text-white';
-
-  protected roleLabel(role: UserRole): string {
-    return ROLE_LABELS[role];
-  }
+    'border-transparent font-medium text-text-muted hover:bg-slate-50 hover:text-text-strong';
 
   protected closeMenu(): void {
     this.menuOpen.set(false);

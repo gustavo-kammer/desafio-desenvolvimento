@@ -1,0 +1,112 @@
+<app-page-header heading="Análise" subtitle="Panorama do estoque e do ritmo das movimentações.">
+  <div class="w-full sm:w-52">
+    <label for="period" class="sr-only">Período</label>
+    <select id="period" class="field-input h-10" [formControl]="periodControl">
+      @for (option of periodOptions; track option.value) {
+        <option [ngValue]="option.value">{{ option.label }}</option>
+      }
+    </select>
+  </div>
+</app-page-header>
+
+@if (error(); as message) {
+  <app-alert class="mb-4 shrink-0">
+    {{ message }}
+    <button alertAction appButton type="button" variant="secondary" size="sm" (click)="reload()">
+      Tentar novamente
+    </button>
+  </app-alert>
+}
+
+@if (summary(); as data) {
+  <div class="space-y-4 pb-2" [class.opacity-60]="loading()">
+    <section aria-label="Indicadores" class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+      @for (kpi of kpis(); track kpi.label) {
+        <article class="card p-5">
+          <p class="text-xs font-semibold tracking-wide text-text-muted uppercase">
+            {{ kpi.label }}
+          </p>
+          <p
+            class="mt-2 text-3xl font-bold"
+            [class.text-danger]="kpi.alert"
+            [class.text-text-strong]="!kpi.alert"
+          >
+            {{ kpi.value }}
+          </p>
+          <p class="mt-1 text-xs text-text-subtle">{{ kpi.hint }}</p>
+        </article>
+      }
+    </section>
+
+    <div class="grid gap-4 lg:grid-cols-3">
+      <section class="card p-5 lg:col-span-2">
+        <h2 class="text-sm font-semibold text-text-strong">Movimentações por dia</h2>
+        <p class="mb-4 text-xs text-text-muted">
+          Número de lançamentos de entrada e saída (inclui ajustes). {{ periodLabel() }}.
+        </p>
+        @if (hasMovements() && dailyChart(); as config) {
+          <app-chart
+            [config]="config"
+            firstColumn="Dia"
+            ariaLabel="Gráfico de linhas com o número de entradas e saídas por dia no período selecionado"
+          />
+        } @else {
+          <p class="py-16 text-center text-sm text-text-muted">Sem movimentações no período.</p>
+        }
+      </section>
+
+      <section class="card p-5">
+        <h2 class="text-sm font-semibold text-text-strong">Movimentações por tipo</h2>
+        <p class="mb-4 text-xs text-text-muted">Distribuição no período.</p>
+        @if (typeChart(); as config) {
+          <app-chart
+            [config]="config"
+            firstColumn="Tipo"
+            ariaLabel="Gráfico de rosca com a distribuição das movimentações por tipo"
+          />
+        } @else {
+          <p class="py-16 text-center text-sm text-text-muted">Sem movimentações no período.</p>
+        }
+      </section>
+    </div>
+
+    <div class="grid gap-4 lg:grid-cols-2">
+      <section class="card p-5">
+        <h2 class="text-sm font-semibold text-text-strong">Produtos mais movimentados</h2>
+        <p class="mb-4 text-xs text-text-muted">Top 5 por número de lançamentos no período.</p>
+        @if (topChart(); as config) {
+          <app-chart
+            [config]="config"
+            firstColumn="Produto"
+            ariaLabel="Gráfico de barras com os cinco produtos mais movimentados"
+          />
+        } @else {
+          <p class="py-16 text-center text-sm text-text-muted">Sem movimentações no período.</p>
+        }
+      </section>
+
+      <section class="card p-5">
+        <h2 class="mb-4 flex items-center gap-1.5 text-sm font-semibold text-text-strong">
+          Cobertura dos produtos críticos
+          <app-info-tip
+            label="Como ler o gráfico de cobertura"
+            text="Disponível ÷ estoque mínimo. A linha tracejada marca 100% (o mínimo); abaixo dela pede reposição. O eixo vai até 200%."
+          />
+        </h2>
+        @if (criticalChart(); as config) {
+          <app-chart
+            [config]="config"
+            firstColumn="Produto"
+            ariaLabel="Gráfico de barras com a cobertura de estoque dos produtos mais críticos, em porcentagem do mínimo"
+          />
+        } @else {
+          <p class="py-16 text-center text-sm text-text-muted">
+            Nenhum produto com estoque mínimo definido.
+          </p>
+        }
+      </section>
+    </div>
+  </div>
+} @else if (loading()) {
+  <p class="py-16 text-center text-text-muted">Carregando...</p>
+}

@@ -13,15 +13,15 @@ import { Observable } from 'rxjs';
 import { errorMessage } from '../../../core/api/api-error';
 import { ProductsService } from '../../../core/api/products.service';
 import { ICategory, IProduct, UnitOfMeasure } from '../../../core/models/api.models';
-import { ButtonComponent } from '../../../shared/components/button/button.component';
 import { IUnitOption, UNIT_OPTIONS } from '../../../shared/utils/labels';
-
-type ProductField = 'categoryId' | 'code' | 'name' | 'minimumStock' | 'description';
+import { AlertComponent } from '../../../shared/components/alert/alert.component';
+import { FormActionsComponent } from '../../../shared/components/form-actions/form-actions.component';
+import { isFieldInvalid } from '../../../shared/utils/forms';
 
 @Component({
   selector: 'app-product-form',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ReactiveFormsModule, ButtonComponent],
+  imports: [FormActionsComponent, AlertComponent, ReactiveFormsModule],
   templateUrl: './product-form.component.html',
 })
 export class ProductFormComponent implements OnInit {
@@ -38,6 +38,8 @@ export class ProductFormComponent implements OnInit {
   protected readonly isEditing = computed<boolean>(() => this.product() !== null);
   protected readonly saving = signal<boolean>(false);
   protected readonly error = signal<string | null>(null);
+
+  protected readonly isInvalid = isFieldInvalid;
 
   protected readonly form = this._fb.group({
     categoryId: this._fb.control<number | null>(null, Validators.required),
@@ -67,11 +69,6 @@ export class ProductFormComponent implements OnInit {
     });
     this.form.controls.code.disable();
     this.form.controls.unit.disable();
-  }
-
-  protected isInvalid(field: ProductField): boolean {
-    const control = this.form.controls[field];
-    return control.touched && control.invalid;
   }
 
   protected submit(): void {

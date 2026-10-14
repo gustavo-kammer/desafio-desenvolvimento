@@ -16,12 +16,27 @@
 
   --color-ink: #000000;
   --color-surface: #f3f4f4;
+
+  --color-brand-primary: var(--color-brand-600);
+  --color-brand-primary-hover: var(--color-brand-700);
+  --color-text-strong: #111111;
+  --color-text-muted: var(--color-slate-600);
+  --color-text-subtle: var(--color-slate-500);
+  --color-border-input: var(--color-slate-500);
+  --color-surface-subtle: var(--color-slate-50);
+
+  --color-danger: var(--color-red-700);
+  --color-danger-strong: var(--color-red-800);
+  --color-danger-surface: var(--color-red-50);
+  --color-danger-border: var(--color-red-200);
+
+  --color-line: var(--color-slate-200);
 }
 
 body {
   margin: 0;
   background-color: var(--color-surface);
-  color: #111111;
+  color: var(--color-text-strong);
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
 }
@@ -32,15 +47,39 @@ body {
   }
 
   .field-input {
-    @apply block w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm placeholder:text-slate-400 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/30 focus:outline-none disabled:bg-slate-100;
+    @apply block w-full rounded-md border border-border-input bg-white px-3 py-2 text-sm placeholder:text-text-subtle focus:border-brand-primary focus:ring-2 focus:ring-brand-primary focus:ring-offset-2 focus:outline-none disabled:bg-slate-100 aria-invalid:border-danger aria-invalid:focus:ring-danger;
   }
 
   .field-error {
-    @apply mt-1 text-xs text-red-700;
+    @apply mt-1 text-xs text-danger;
+  }
+
+  .field-input:-webkit-autofill {
+    -webkit-text-fill-color: var(--color-text-strong);
+    caret-color: var(--color-text-strong);
+    box-shadow: inset 0 0 0 1000px var(--color-white);
+  }
+
+  .field-input:-webkit-autofill:focus {
+    box-shadow:
+      inset 0 0 0 1000px var(--color-white),
+      0 0 0 2px var(--color-white),
+      0 0 0 4px var(--color-brand-primary);
+  }
+
+  .field-input[aria-invalid='true']:-webkit-autofill:focus {
+    box-shadow:
+      inset 0 0 0 1000px var(--color-white),
+      0 0 0 2px var(--color-white),
+      0 0 0 4px var(--color-danger);
+  }
+
+  .title-caps {
+    @apply font-bold tracking-wide uppercase;
   }
 
   .card {
-    @apply rounded-lg border border-slate-200 bg-white shadow-sm;
+    @apply rounded-lg border border-line bg-white shadow-sm;
   }
 
   .data-table {
@@ -48,7 +87,7 @@ body {
   }
 
   .data-table th {
-    @apply border-b border-slate-200 bg-slate-50 px-4 py-3 text-xs font-semibold tracking-wide text-slate-600 uppercase;
+    @apply border-b border-line bg-slate-50 px-4 py-3 text-xs font-semibold tracking-wide text-text-muted uppercase;
   }
 
   .data-table td {
@@ -57,5 +96,13 @@ body {
 
   .data-table tbody tr:hover {
     @apply bg-slate-50;
+  }
+
+  .field-inline {
+    @apply flex h-10 items-center gap-2 rounded-md border border-border-input bg-white px-3 text-sm text-text-muted focus-within:border-brand-primary focus-within:ring-2 focus-within:ring-brand-primary focus-within:ring-offset-2;
+  }
+
+  .field-inline input {
+    @apply bg-transparent text-text-strong focus:outline-none;
   }
 }

@@ -1,4 +1,3 @@
-import { DecimalPipe } from '@angular/common';
 import {
   ChangeDetectionStrategy,
   Component,
@@ -18,10 +17,13 @@ import {
   IProduct,
   IStockMovement,
   MovementReason,
-  UnitOfMeasure,
 } from '../../../core/models/api.models';
-import { ButtonComponent } from '../../../shared/components/button/button.component';
-import { MOVEMENT_REASON_LABELS, UNIT_LABELS } from '../../../shared/utils/labels';
+import { MOVEMENT_REASON_LABELS } from '../../../shared/utils/labels';
+import { AlertComponent } from '../../../shared/components/alert/alert.component';
+import { FormActionsComponent } from '../../../shared/components/form-actions/form-actions.component';
+import { QuantityPipe } from '../../../shared/pipes/quantity.pipe';
+import { UnitLabelPipe } from '../../../shared/pipes/unit-label.pipe';
+import { isFieldInvalid } from '../../../shared/utils/forms';
 
 interface IOperationOption {
   value: MovementOperation;
@@ -33,8 +35,6 @@ interface IReasonOption {
   value: MovementReason;
   label: string;
 }
-
-type MovementField = 'productId' | 'quantity' | 'reason' | 'justification';
 
 const OPERATIONS: IOperationOption[] = [
   { value: 'entry', label: 'Entrada', adjustment: false },
@@ -55,7 +55,7 @@ const ADJUSTMENT_REASONS: MovementReason[] = [
 @Component({
   selector: 'app-movement-form',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ReactiveFormsModule, DecimalPipe, ButtonComponent],
+  imports: [UnitLabelPipe, QuantityPipe, FormActionsComponent, AlertComponent, ReactiveFormsModule],
   templateUrl: './movement-form.component.html',
 })
 export class MovementFormComponent {
@@ -66,6 +66,7 @@ export class MovementFormComponent {
   public readonly canAdjust = input<boolean>(false);
 
   public readonly registered = output<IStockMovement>();
+  public readonly cancelled = output<void>();
 
   protected readonly activeClass: string = 'border-brand-600 bg-brand-600 text-white';
   protected readonly idleClass: string =
@@ -89,6 +90,8 @@ export class MovementFormComponent {
     }));
   });
 
+  protected readonly isInvalid = isFieldInvalid;
+
   protected readonly form = this._fb.group({
     productId: this._fb.control<number | null>(null, Validators.required),
     quantity: this._fb.control<number | null>(null, [Validators.required, Validators.min(0.001)]),
@@ -105,15 +108,6 @@ export class MovementFormComponent {
   protected readonly selectedProduct = computed<IProduct | null>(
     () => this.products().find((p: IProduct) => p.id === this._selectedProductId()) ?? null,
   );
-
-  protected unitLabel(unit: UnitOfMeasure): string {
-    return UNIT_LABELS[unit];
-  }
-
-  protected isInvalid(field: MovementField): boolean {
-    const control = this.form.controls[field];
-    return control.touched && control.invalid;
-  }
 
   protected selectOperation(operation: MovementOperation): void {
     this.operation.set(operation);

@@ -3,7 +3,7 @@ import { ToastKind, ToastService } from './toast.service';
 
 const KIND_CLASSES: Record<ToastKind, string> = {
   success: 'bg-brand-700',
-  error: 'bg-red-700',
+  error: 'bg-danger',
   info: 'bg-ink',
 };
 

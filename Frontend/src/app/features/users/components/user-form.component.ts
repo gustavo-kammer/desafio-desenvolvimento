@@ -14,8 +14,10 @@ import { errorMessage } from '../../../core/api/api-error';
 import { UsersService } from '../../../core/api/users.service';
 import { AuthService } from '../../../core/auth/auth.service';
 import { IUser, UserRole } from '../../../core/models/api.models';
-import { ButtonComponent } from '../../../shared/components/button/button.component';
 import { ROLE_LABELS } from '../../../shared/utils/labels';
+import { AlertComponent } from '../../../shared/components/alert/alert.component';
+import { FormActionsComponent } from '../../../shared/components/form-actions/form-actions.component';
+import { isFieldInvalid } from '../../../shared/utils/forms';
 
 interface IRoleOption {
   value: UserRole;
@@ -25,7 +27,7 @@ interface IRoleOption {
 @Component({
   selector: 'app-user-form',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ReactiveFormsModule, ButtonComponent],
+  imports: [FormActionsComponent, AlertComponent, ReactiveFormsModule],
   templateUrl: './user-form.component.html',
 })
 export class UserFormComponent implements OnInit {
@@ -45,6 +47,8 @@ export class UserFormComponent implements OnInit {
   protected readonly roleOptions: IRoleOption[] = (Object.keys(ROLE_LABELS) as UserRole[]).map(
     (value: UserRole): IRoleOption => ({ value, label: ROLE_LABELS[value] }),
   );
+
+  protected readonly isInvalid = isFieldInvalid;
 
   protected readonly form = this._fb.nonNullable.group({
     name: ['', [Validators.required, Validators.maxLength(120)]],

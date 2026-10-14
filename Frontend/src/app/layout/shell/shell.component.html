@@ -1,4 +1,4 @@
-<div class="flex min-h-screen">
+<div class="flex h-dvh overflow-hidden">
   @if (menuOpen()) {
     <button
       type="button"
@@ -9,60 +9,85 @@
   }
 
   <aside
-    class="fixed inset-y-0 left-0 z-40 flex w-64 flex-col bg-ink text-white transition-transform lg:sticky lg:top-0 lg:h-screen lg:translate-x-0"
-    [class]="menuOpen() ? 'translate-x-0' : '-translate-x-full'"
+    class="fixed inset-y-0 left-0 z-40 flex w-64 flex-col border-r border-line bg-white transition-[transform,visibility] lg:static lg:translate-x-0"
+    [class]="menuOpen() ? 'translate-x-0' : '-translate-x-full max-lg:invisible'"
   >
-    <div class="flex items-center gap-3 px-6 py-6">
-      <span class="h-8 w-2 rounded-full bg-brand-500"></span>
-      <span class="text-lg font-semibold tracking-wide">Estoque</span>
+    <div class="flex h-16 shrink-0 items-center border-b border-line px-6">
+      <img src="/brand/logo.png" alt="Torrecid" width="2058" height="621" class="h-9 w-auto" />
     </div>
 
-    <nav class="flex-1 space-y-1 px-3" aria-label="Principal">
+    <nav class="flex-1 space-y-1 overflow-y-auto px-3 py-4" aria-label="Principal">
       @for (item of items(); track item.path) {
         <a
-          class="block rounded-md border-l-4 px-3 py-2.5 text-sm font-medium transition"
+          class="flex items-center gap-3 rounded-md border-l-4 px-3 py-2.5 text-sm transition focus-visible:ring-2 focus-visible:ring-brand-primary focus-visible:outline-none"
           [routerLink]="item.path"
           routerLinkActive
+          ariaCurrentWhenActive="page"
           #link="routerLinkActive"
           [class]="link.isActive ? activeLinkClass : idleLinkClass"
           (click)="closeMenu()"
         >
+          <svg
+            viewBox="0 0 24 24"
+            class="size-5 shrink-0"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            aria-hidden="true"
+          >
+            @for (d of item.icon; track $index) {
+              <path [attr.d]="d" />
+            }
+          </svg>
           {{ item.label }}
         </a>
       }
     </nav>
-
-    <p class="border-t border-white/10 px-6 py-4 text-xs text-white/40">
-      Sistema de gerenciamento de estoque
-    </p>
   </aside>
 
-  <div class="flex min-w-0 flex-1 flex-col">
-    <header class="flex items-center gap-3 border-b border-slate-200 bg-white px-4 py-3 sm:px-6">
+  <div class="flex min-h-0 min-w-0 flex-1 flex-col">
+    <header
+      class="sticky top-0 z-20 flex h-16 shrink-0 items-center gap-3 border-b border-line bg-white px-4 sm:px-6"
+    >
       <button
         type="button"
-        class="rounded-md p-2 text-slate-700 hover:bg-slate-100 lg:hidden"
+        class="flex size-11 items-center justify-center rounded-md text-text-strong hover:bg-slate-100 focus-visible:ring-2 focus-visible:ring-brand-primary focus-visible:outline-none lg:hidden"
         aria-label="Abrir menu"
         (click)="menuOpen.set(true)"
       >
-        ☰
+        <svg
+          viewBox="0 0 24 24"
+          class="size-6"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          aria-hidden="true"
+        >
+          <path d="M4 6h16" />
+          <path d="M4 12h16" />
+          <path d="M4 18h16" />
+        </svg>
       </button>
 
-      <div class="ml-auto flex items-center gap-4">
+      <img
+        src="/brand/logo.png"
+        alt="Torrecid"
+        width="2058"
+        height="621"
+        class="h-7 w-auto lg:hidden"
+      />
+
+      <div class="ml-auto">
         @if (user(); as u) {
-          <div class="hidden text-right leading-tight sm:block">
-            <p class="text-sm font-semibold">{{ u.name }}</p>
-            <p class="text-xs text-slate-500">{{ u.email }}</p>
-          </div>
-          <app-badge tone="success">{{ roleLabel(u.role) }}</app-badge>
+          <app-user-menu [user]="u" (signOut)="logout()" />
         }
-        <button appButton type="button" variant="secondary" size="sm" (click)="logout()">
-          Sair
-        </button>
       </div>
     </header>
 
-    <main class="flex-1 p-4 sm:p-6 lg:p-8">
+    <main class="flex min-h-0 flex-1 flex-col overflow-y-auto p-4 sm:p-6 lg:p-8">
       <router-outlet />
     </main>
   </div>

@@ -1,111 +1,133 @@
-<section class="space-y-6">
-  <header class="flex flex-wrap items-center justify-between gap-3">
-    <div>
-      <h1 class="text-2xl font-bold">Reservas</h1>
-      <p class="text-sm text-gray-600">Quantidades separadas do estoque disponível.</p>
-    </div>
-    @if (canOperate()) {
-      <button appButton type="button" (click)="openCreate()">Nova reserva</button>
-    }
-  </header>
+<app-page-header heading="Reservas" subtitle="Quantidades separadas do estoque disponível.">
+  @if (canOperate()) {
+    <button appButton type="button" variant="add" (click)="openCreate()">Nova reserva</button>
+  }
+</app-page-header>
 
-  <div class="card flex flex-wrap items-end gap-4 p-4">
-    <div>
-      <label for="status" class="field-label">Status</label>
-      <select id="status" class="field-input" [formControl]="statusControl">
-        <option value="">Todos</option>
+@if (error(); as message) {
+  <app-alert class="mb-4 shrink-0">
+    {{ message }}
+    <button alertAction appButton type="button" variant="secondary" size="sm" (click)="reload()">
+      Tentar novamente
+    </button>
+  </app-alert>
+}
+
+<section class="card flex min-h-96 flex-1 flex-col overflow-hidden">
+  <div class="flex shrink-0 flex-wrap items-center gap-3 border-b border-line p-4">
+    <app-search-field
+      inputId="reservation-search"
+      label="Buscar reserva"
+      placeholder="Buscar por produto ou responsável"
+      [control]="searchControl"
+    />
+
+    <div class="w-full sm:w-56">
+      <label for="status" class="sr-only">Status</label>
+      <select id="status" class="field-input h-10" [formControl]="statusControl">
+        <option value="">Todos os status</option>
         <option value="active">{{ statusLabels['active'] }}</option>
         <option value="consumed">{{ statusLabels['consumed'] }}</option>
         <option value="canceled">{{ statusLabels['canceled'] }}</option>
       </select>
     </div>
+
+    <label class="field-inline">
+      De
+      <input type="date" [formControl]="fromControl" />
+    </label>
+
+    <label class="field-inline">
+      Até
+      <input type="date" [formControl]="toControl" />
+    </label>
+
+    @if (hasFilters()) {
+      <button appButton type="button" variant="ghost" size="sm" (click)="clearFilters()">
+        Limpar filtros
+      </button>
+    }
   </div>
 
-  @if (error(); as message) {
-    <div
-      class="flex items-center justify-between rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700"
-      role="alert"
-    >
-      <span>{{ message }}</span>
-      <button appButton type="button" variant="secondary" size="sm" (click)="reload()">
-        Tentar novamente
-      </button>
-    </div>
-  }
-
-  <div class="card overflow-x-auto">
-    <table class="data-table">
-      <thead>
+  <div class="min-h-0 flex-1 overflow-auto">
+    <table class="data-table min-w-200" [class.opacity-60]="loading()">
+      <thead class="sticky top-0 z-10">
         <tr>
-          <th>Produto</th>
-          <th class="text-right">Quantidade</th>
-          <th>Status</th>
-          <th>Criada por</th>
-          <th>Criada em</th>
-          <th>Encerrada por</th>
-          <th>Encerrada em</th>
+          <th scope="col">Produto</th>
+          <th scope="col" class="text-right">Quantidade</th>
+          <th scope="col">Status</th>
+          <th scope="col">Criada</th>
+          <th scope="col">Encerrada</th>
           @if (canOperate()) {
-            <th class="text-right">Ações</th>
+            <th scope="col"><span class="sr-only">Ações</span></th>
           }
         </tr>
       </thead>
       <tbody>
-        @if (loading()) {
+        @if (loading() && items().length === 0) {
           <tr>
-            <td [attr.colspan]="canOperate() ? 8 : 7" class="py-8 text-center text-gray-500">
-              Carregando…
+            <td [attr.colspan]="canOperate() ? 6 : 5" class="py-16 text-center text-text-muted">
+              Carregando...
             </td>
           </tr>
         } @else {
-          @for (item of items(); track item.id) {
+          @for (item of filtered(); track item.id) {
             <tr>
               <td>
-                <div class="font-medium">{{ item.product?.name ?? '—' }}</div>
-                <div class="text-xs text-gray-500">{{ item.product?.code }}</div>
+                <p class="font-medium">{{ item.product?.name ?? '—' }}</p>
+                <p class="font-mono text-xs text-text-subtle">{{ item.product?.code }}</p>
               </td>
-              <td class="text-right tabular-nums">
-                {{ item.quantity | number: '1.0-3' }}
+              <td class="text-right font-semibold whitespace-nowrap">
+                {{ item.quantity | quantity }}
                 @if (item.product) {
-                  <span class="text-xs text-gray-500">{{ unitLabels[item.product.unit] }}</span>
+                  <span class="text-xs font-normal text-text-muted">
+                    {{ item.product.unit | unitLabel }}
+                  </span>
                 }
               </td>
               <td>
                 <app-badge [tone]="tone(item.status)">{{ statusLabels[item.status] }}</app-badge>
               </td>
-              <td>{{ item.createdBy?.name ?? '—' }}</td>
-              <td>{{ item.createdAt | date: 'dd/MM/yyyy HH:mm' }}</td>
-              <td>{{ item.closedBy?.name ?? '—' }}</td>
-              <td>{{ item.closedAt ? (item.closedAt | date: 'dd/MM/yyyy HH:mm') : '—' }}</td>
+              <td class="whitespace-nowrap">
+                <p class="text-text-muted">{{ item.createdAt | date: 'dd/MM/yyyy HH:mm' }}</p>
+                <p class="text-xs text-text-subtle">{{ item.createdBy?.name ?? '—' }}</p>
+              </td>
+              <td class="whitespace-nowrap">
+                @if (item.closedAt) {
+                  <p class="text-text-muted">{{ item.closedAt | date: 'dd/MM/yyyy HH:mm' }}</p>
+                  <p class="text-xs text-text-subtle">{{ item.closedBy?.name ?? '—' }}</p>
+                } @else {
+                  <span class="text-text-subtle">—</span>
+                }
+              </td>
               @if (canOperate()) {
-                <td class="text-right">
+                <td class="text-right whitespace-nowrap">
                   @if (item.status === 'active') {
-                    <div class="flex justify-end gap-2">
-                      <button
-                        appButton
-                        type="button"
-                        size="sm"
-                        variant="secondary"
-                        (click)="askAction(item, 'consume')"
-                      >
-                        Consumir
-                      </button>
-                      <button
-                        appButton
-                        type="button"
-                        size="sm"
-                        variant="ghost"
-                        (click)="askAction(item, 'cancel')"
-                      >
-                        Cancelar
-                      </button>
-                    </div>
+                    <button
+                      appButton
+                      type="button"
+                      size="sm"
+                      variant="ghost"
+                      (click)="askAction(item, 'consume')"
+                    >
+                      Consumir
+                    </button>
+                    <button
+                      appButton
+                      type="button"
+                      size="sm"
+                      variant="ghost"
+                      (click)="askAction(item, 'cancel')"
+                    >
+                      Cancelar
+                    </button>
                   }
                 </td>
               }
             </tr>
           } @empty {
             <tr>
-              <td [attr.colspan]="canOperate() ? 8 : 7" class="py-8 text-center text-gray-500">
+              <td [attr.colspan]="canOperate() ? 6 : 5" class="py-16 text-center text-text-muted">
                 Nenhuma reserva encontrada.
               </td>
             </tr>
@@ -113,6 +135,10 @@
         }
       </tbody>
     </table>
+  </div>
+
+  <div class="shrink-0 border-t border-line px-4 py-3 text-sm text-text-muted">
+    {{ filtered().length }} reserva(s)
   </div>
 </section>
 

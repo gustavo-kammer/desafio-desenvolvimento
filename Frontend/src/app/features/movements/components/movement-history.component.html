@@ -1,64 +1,72 @@
-<section class="card mb-4 grid gap-4 p-4 sm:grid-cols-2 lg:grid-cols-5">
-  <div class="lg:col-span-2">
-    <label for="mh-product" class="field-label">Produto</label>
-    <select id="mh-product" class="field-input" [formControl]="productControl">
-      <option [ngValue]="null">Todos</option>
-      @for (product of products(); track product.id) {
-        <option [ngValue]="product.id">{{ product.code }} · {{ product.name }}</option>
-      }
-    </select>
-  </div>
-
-  <div>
-    <label for="mh-type" class="field-label">Tipo</label>
-    <select id="mh-type" class="field-input" [formControl]="typeControl">
-      <option [ngValue]="null">Todos</option>
-      @for (option of typeOptions; track option.value) {
-        <option [ngValue]="option.value">{{ option.label }}</option>
-      }
-    </select>
-  </div>
-
-  <div>
-    <label for="mh-from" class="field-label">De</label>
-    <input id="mh-from" type="date" class="field-input" [formControl]="fromControl" />
-  </div>
-
-  <div>
-    <label for="mh-to" class="field-label">Até</label>
-    <input id="mh-to" type="date" class="field-input" [formControl]="toControl" />
-  </div>
-
-  <div class="sm:col-span-2 lg:col-span-5">
-    <button appButton type="button" variant="ghost" size="sm" (click)="clearFilters()">
-      Limpar filtros
-    </button>
-  </div>
-</section>
-
 @if (error(); as message) {
-  <div
-    role="alert"
-    class="mb-4 flex items-center justify-between gap-3 rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800"
-  >
-    <span>{{ message }}</span>
-    <button appButton type="button" variant="secondary" size="sm" (click)="reload()">
+  <app-alert class="mb-4 shrink-0">
+    {{ message }}
+    <button alertAction appButton type="button" variant="secondary" size="sm" (click)="reload()">
       Tentar novamente
     </button>
-  </div>
+  </app-alert>
 }
 
-<section class="card overflow-hidden">
-  <div class="overflow-x-auto">
-    <table class="data-table" [class.opacity-60]="loading()">
-      <thead>
+<section class="card flex min-h-96 flex-1 flex-col overflow-hidden">
+  <div class="flex shrink-0 flex-wrap items-center gap-3 border-b border-line p-4">
+    <div class="w-full sm:w-64">
+      <label for="mh-product" class="sr-only">Produto</label>
+      <select id="mh-product" class="field-input h-10" [formControl]="productControl">
+        <option [ngValue]="null">Todos os produtos</option>
+        @for (product of products(); track product.id) {
+          <option [ngValue]="product.id">{{ product.code }} · {{ product.name }}</option>
+        }
+      </select>
+    </div>
+
+    <div class="w-full sm:w-52">
+      <label for="mh-type" class="sr-only">Tipo</label>
+      <select id="mh-type" class="field-input h-10" [formControl]="typeControl">
+        <option [ngValue]="null">Todos os tipos</option>
+        @for (option of typeOptions; track option.value) {
+          <option [ngValue]="option.value">{{ option.label }}</option>
+        }
+      </select>
+    </div>
+
+    @if (canFilterByUser) {
+      <div class="w-full sm:w-56">
+        <label for="mh-user" class="sr-only">Responsável</label>
+        <select id="mh-user" class="field-input h-10" [formControl]="userControl">
+          <option [ngValue]="null">Todos os responsáveis</option>
+          @for (user of users(); track user.id) {
+            <option [ngValue]="user.id">{{ user.name }}</option>
+          }
+        </select>
+      </div>
+    }
+
+    <label class="field-inline">
+      De
+      <input type="date" [formControl]="fromControl" />
+    </label>
+
+    <label class="field-inline">
+      Até
+      <input type="date" [formControl]="toControl" />
+    </label>
+
+    @if (hasFilters()) {
+      <button appButton type="button" variant="ghost" size="sm" (click)="clearFilters()">
+        Limpar filtros
+      </button>
+    }
+  </div>
+
+  <div class="min-h-0 flex-1 overflow-auto">
+    <table class="data-table [&_td]:px-3 [&_th]:px-3" [class.opacity-60]="loading()">
+      <thead class="sticky top-0 z-10">
         <tr>
           <th scope="col">Data</th>
           <th scope="col">Tipo</th>
           <th scope="col">Produto</th>
           <th scope="col" class="text-right">Quantidade</th>
-          <th scope="col" class="text-right">Saldo total</th>
-          <th scope="col" class="text-right">Reservado</th>
+          <th scope="col" class="text-right">Saldo</th>
           <th scope="col">Responsável</th>
           <th scope="col">Detalhes</th>
         </tr>
@@ -67,7 +75,7 @@
         @if (result(); as data) {
           @for (movement of data.items; track movement.id) {
             <tr>
-              <td class="whitespace-nowrap text-slate-600">
+              <td class="whitespace-nowrap text-text-muted">
                 {{ movement.occurredAt | date: 'dd/MM/yyyy HH:mm' }}
               </td>
               <td>
@@ -75,30 +83,34 @@
                   typeLabel(movement.type)
                 }}</app-badge>
               </td>
-              <td>
+              <td class="min-w-36">
                 <p class="font-medium">{{ movement.product.name }}</p>
-                <p class="font-mono text-xs text-slate-500">{{ movement.product.code }}</p>
+                <p class="font-mono text-xs text-text-subtle">{{ movement.product.code }}</p>
               </td>
-              <td class="whitespace-nowrap text-right font-semibold">
-                {{ movement.quantity | number: '1.0-3' }} {{ unitLabel(movement.product.unit) }}
+              <td class="text-right font-semibold whitespace-nowrap">
+                {{ movement.quantity | quantity: movement.product.unit }}
               </td>
-              <td class="whitespace-nowrap text-right text-slate-600">
-                {{ movement.totalBefore | number: '1.0-3' }} →
-                <strong class="text-slate-900">{{ movement.totalAfter | number: '1.0-3' }}</strong>
-              </td>
-              <td class="whitespace-nowrap text-right text-slate-600">
-                {{ movement.reservedBefore | number: '1.0-3' }} →
-                <strong class="text-slate-900">{{
-                  movement.reservedAfter | number: '1.0-3'
-                }}</strong>
+              <td class="text-right text-xs whitespace-nowrap text-text-muted">
+                <p>
+                  Total {{ movement.totalBefore | quantity }} →
+                  <strong class="text-text-strong">{{ movement.totalAfter | quantity }}</strong>
+                </p>
+                <p>
+                  Reservado {{ movement.reservedBefore | quantity }} →
+                  <strong class="text-text-strong">{{ movement.reservedAfter | quantity }}</strong>
+                </p>
               </td>
               <td>
-                <p class="text-sm">{{ movement.user.name }}</p>
-                <p class="text-xs text-slate-500">{{ movement.user.email }}</p>
+                <p class="max-w-40 truncate text-sm" [title]="movement.user.name">
+                  {{ movement.user.name }}
+                </p>
+                <p class="max-w-40 truncate text-xs text-text-subtle" [title]="movement.user.email">
+                  {{ movement.user.email }}
+                </p>
               </td>
-              <td class="max-w-xs space-y-0.5 text-xs text-slate-600">
+              <td class="min-w-40 space-y-0.5 text-xs text-text-muted">
                 @if (movement.reason) {
-                  <p class="font-semibold text-slate-800">{{ reasonLabel(movement.reason) }}</p>
+                  <p class="font-semibold text-text-strong">{{ reasonLabel(movement.reason) }}</p>
                 }
                 @if (movement.justification) {
                   <p>{{ movement.justification }}</p>
@@ -113,14 +125,14 @@
             </tr>
           } @empty {
             <tr>
-              <td colspan="8" class="py-10 text-center text-slate-500">
+              <td colspan="7" class="py-16 text-center text-text-muted">
                 Nenhuma movimentação encontrada.
               </td>
             </tr>
           }
         } @else if (loading()) {
           <tr>
-            <td colspan="8" class="py-10 text-center text-slate-500">Carregando...</td>
+            <td colspan="7" class="py-16 text-center text-text-muted">Carregando...</td>
           </tr>
         }
       </tbody>
@@ -128,7 +140,7 @@
   </div>
 
   @if (result(); as data) {
-    <div class="border-t border-slate-200 px-4 py-3">
+    <div class="shrink-0 border-t border-line px-4 py-3">
       <app-pagination
         [page]="data.page"
         [totalPages]="data.totalPages"

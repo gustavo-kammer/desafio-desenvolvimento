@@ -13,12 +13,14 @@ import { Observable } from 'rxjs';
 import { errorMessage } from '../../../core/api/api-error';
 import { CategoriesService } from '../../../core/api/categories.service';
 import { ICategory, ISaveCategoryRequest } from '../../../core/models/api.models';
-import { ButtonComponent } from '../../../shared/components/button/button.component';
+import { AlertComponent } from '../../../shared/components/alert/alert.component';
+import { FormActionsComponent } from '../../../shared/components/form-actions/form-actions.component';
+import { isFieldInvalid } from '../../../shared/utils/forms';
 
 @Component({
   selector: 'app-category-form',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ReactiveFormsModule, ButtonComponent],
+  imports: [FormActionsComponent, AlertComponent, ReactiveFormsModule],
   templateUrl: './category-form.component.html',
 })
 export class CategoryFormComponent implements OnInit {
@@ -33,6 +35,8 @@ export class CategoryFormComponent implements OnInit {
   protected readonly isEditing = computed<boolean>(() => this.category() !== null);
   protected readonly saving = signal<boolean>(false);
   protected readonly error = signal<string | null>(null);
+
+  protected readonly isInvalid = isFieldInvalid;
 
   protected readonly form = this._fb.nonNullable.group({
     name: ['', [Validators.required, Validators.maxLength(120)]],

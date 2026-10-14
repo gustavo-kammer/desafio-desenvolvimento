@@ -32,6 +32,7 @@ public static class DependencyInjection
         services.AddScoped<IStockRepository, StockRepository>();
         services.AddScoped<IReservationRepository, ReservationRepository>();
         services.AddScoped<IStockMovementRepository, StockMovementRepository>();
+        services.AddScoped<IAnalyticsRepository, AnalyticsRepository>();
 
         services.AddOptions<JwtOptions>().Bind(configuration.GetSection(JwtOptions.SectionName))
             .Validate(o => o.Secret.Length >= 32, "Jwt:Secret precisa ter pelo menos 32 caracteres.")

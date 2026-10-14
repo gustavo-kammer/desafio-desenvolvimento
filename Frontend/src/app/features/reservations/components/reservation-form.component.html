@@ -1,11 +1,6 @@
 <form [formGroup]="form" (ngSubmit)="submit()" class="space-y-4" novalidate>
   @if (error(); as message) {
-    <div
-      class="rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700"
-      role="alert"
-    >
-      {{ message }}
-    </div>
+    <app-alert>{{ message }}</app-alert>
   }
 
   <div>
@@ -14,12 +9,12 @@
       <option [ngValue]="0" disabled>Selecione um produto</option>
       @for (product of products(); track product.id) {
         <option [ngValue]="product.id">
-          {{ product.code }} · {{ product.name }} (disp.: {{ product.stock.availableQuantity }}
-          {{ unitLabels[product.unit] }})
+          {{ product.code }} · {{ product.name }} (disp.:
+          {{ product.stock.availableQuantity | quantity: product.unit }})
         </option>
       }
     </select>
-    @if (form.controls.productId.touched && form.controls.productId.invalid) {
+    @if (isInvalid(form.controls.productId)) {
       <p class="field-error">Selecione um produto.</p>
     }
   </div>
@@ -33,13 +28,15 @@
       formControlName="quantity"
       class="field-input"
     />
-    @if (form.controls.quantity.touched && form.controls.quantity.invalid) {
+    @if (isInvalid(form.controls.quantity)) {
       <p class="field-error">Informe uma quantidade maior que zero.</p>
     }
   </div>
 
-  <div class="flex justify-end gap-2 pt-2">
-    <button appButton type="button" variant="secondary" (click)="cancel()">Fechar</button>
-    <button appButton type="submit" [loading]="saving()">Reservar</button>
-  </div>
+  <app-form-actions
+    submitLabel="Reservar"
+    [saving]="saving()"
+    cancelLabel="Fechar"
+    (cancelled)="cancel()"
+  />
 </form>

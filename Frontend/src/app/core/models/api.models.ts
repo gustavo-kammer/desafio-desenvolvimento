@@ -155,3 +155,48 @@ export interface IUpdateUserRequest {
 export interface IResetPasswordRequest {
   newPassword: string;
 }
+
+export interface IAnalyticsOverview {
+  activeProducts: number;
+  belowMinimum: number;
+  activeReservations: number;
+  movementsInPeriod: number;
+}
+
+export interface IDailyMovement {
+  /** Dia local, no formato yyyy-MM-dd. */
+  date: string;
+  entries: number;
+  exits: number;
+}
+
+export interface IMovementTypeCount {
+  type: MovementType;
+  count: number;
+}
+
+export interface ITopProduct {
+  productId: number;
+  code: string;
+  name: string;
+  movements: number;
+}
+
+export interface ICriticalProduct {
+  productId: number;
+  code: string;
+  name: string;
+  unit: UnitOfMeasure;
+  available: number;
+  minimumStock: number;
+  coverage: number;
+}
+
+export interface IAnalyticsSummary {
+  days: number;
+  overview: IAnalyticsOverview;
+  dailyMovements: IDailyMovement[];
+  movementsByType: IMovementTypeCount[];
+  topProducts: ITopProduct[];
+  criticalProducts: ICriticalProduct[];
+}

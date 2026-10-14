@@ -17,13 +17,24 @@ import { UsersService } from '../../../core/api/users.service';
 import { AuthService } from '../../../core/auth/auth.service';
 import { ToastService } from '../../../shared/components/toast/toast.service';
 import { ROLE_LABELS } from '../../../shared/utils/labels';
-import { IUser } from '../../../core/models/api.models';
+import { IUser, UserRole } from '../../../core/models/api.models';
 import { errorMessage } from '../../../core/api/api-error';
+import { FormControl, ReactiveFormsModule } from '@angular/forms';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { AlertComponent } from '../../../shared/components/alert/alert.component';
+import { PageHeaderComponent } from '../../../shared/components/page-header/page-header.component';
+import { SearchFieldComponent } from '../../../shared/components/search-field/search-field.component';
+
+type UserStatusFilter = '' | 'active' | 'inactive';
 
 @Component({
   selector: 'app-users-page',
   changeDetection: ChangeDetectionStrategy.OnPush,
+  host: { class: 'flex min-h-0 flex-1 flex-col' },
   imports: [
+    SearchFieldComponent,
+    PageHeaderComponent,
+    AlertComponent,
     DatePipe,
     BadgeComponent,
     ButtonComponent,
@@ -31,6 +42,7 @@ import { errorMessage } from '../../../core/api/api-error';
     ModalComponent,
     UserFormComponent,
     ResetPasswordFormComponent,
+    ReactiveFormsModule,
   ],
   templateUrl: './users.page.html',
 })
@@ -40,6 +52,15 @@ export class UsersPage implements OnInit {
   private readonly _toast: ToastService = inject(ToastService);
 
   protected readonly roleLabels = ROLE_LABELS;
+  protected readonly roles = Object.keys(ROLE_LABELS) as UserRole[];
+
+  protected readonly searchControl = new FormControl<string>('', { nonNullable: true });
+  protected readonly roleControl = new FormControl<UserRole | ''>('', { nonNullable: true });
+  protected readonly statusControl = new FormControl<UserStatusFilter>('', { nonNullable: true });
+
+  private readonly _search = toSignal(this.searchControl.valueChanges, { initialValue: '' });
+  private readonly _role = toSignal(this.roleControl.valueChanges, { initialValue: '' });
+  private readonly _status = toSignal(this.statusControl.valueChanges, { initialValue: '' });
 
   protected readonly users = signal<IUser[]>([]);
   protected readonly loading = signal<boolean>(true);
@@ -149,5 +170,30 @@ export class UsersPage implements OnInit {
         this._toast.error(errorMessage(err));
       },
     });
+  }
+
+  protected readonly filtered = computed<IUser[]>(() => {
+    const term: string = this._search().trim().toLowerCase();
+    const role: UserRole | '' = this._role();
+    const status: UserStatusFilter = this._status();
+
+    return this.users().filter(
+      (user: IUser): boolean =>
+        (term === '' ||
+          user.name.toLowerCase().includes(term) ||
+          user.email.toLowerCase().includes(term)) &&
+        (role === '' || user.role === role) &&
+        (status === '' || (status === 'active') === user.isActive),
+    );
+  });
+
+  protected readonly hasFilters = computed<boolean>(
+    () => this._search().trim() !== '' || this._role() !== '' || this._status() !== '',
+  );
+
+  protected clearFilters(): void {
+    this.searchControl.reset();
+    this.roleControl.reset();
+    this.statusControl.reset();
   }
 }

@@ -2,11 +2,18 @@ import {
   ChangeDetectionStrategy,
   Component,
   ElementRef,
+  computed,
   effect,
   input,
   model,
   viewChild,
 } from '@angular/core';
+
+export type ModalSize = 'md' | 'lg';
+const SIZE_CLASSES: Record<ModalSize, string> = {
+  md: 'max-w-lg',
+  lg: 'max-w-2xl',
+};
 
 @Component({
   selector: 'app-modal',
@@ -16,6 +23,9 @@ import {
 export class ModalComponent {
   public readonly open = model<boolean>(false);
   public readonly title = input.required<string>();
+  public readonly size = input<ModalSize>('md');
+
+  protected readonly sizeClass = computed<string>(() => SIZE_CLASSES[this.size()]);
 
   private readonly _dialog = viewChild.required<ElementRef<HTMLDialogElement>>('dialog');
 

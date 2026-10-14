@@ -1,61 +1,71 @@
-<header class="mb-6 flex flex-wrap items-start justify-between gap-3">
-  <div>
-    <h1 class="text-2xl font-bold">Produtos</h1>
-    <p class="mt-1 text-sm text-slate-600">Consulte o saldo, as reservas e o estoque disponível.</p>
-  </div>
+<app-page-header
+  heading="Produtos"
+  subtitle="Consulte o saldo, as reservas e o estoque disponível."
+>
   @if (canManage()) {
-    <button appButton type="button" (click)="openCreate()">Novo produto</button>
+    <button appButton type="button" variant="add" (click)="openCreate()">Novo produto</button>
   }
-</header>
-
-<section class="card mb-4 grid gap-4 p-4 sm:grid-cols-2 lg:grid-cols-4">
-  <div class="lg:col-span-2">
-    <label for="search" class="field-label">Buscar</label>
-    <input
-      id="search"
-      type="search"
-      class="field-input"
-      placeholder="Código ou nome do produto"
-      [formControl]="searchControl"
-    />
-  </div>
-
-  <div>
-    <label for="category" class="field-label">Categoria</label>
-    <select id="category" class="field-input" [formControl]="categoryControl">
-      <option [ngValue]="null">Todas</option>
-      @for (category of categories(); track category.id) {
-        <option [ngValue]="category.id">{{ category.name }}</option>
-      }
-    </select>
-  </div>
-
-  <label class="flex items-end gap-2 pb-2 text-sm font-medium text-slate-800">
-    <input
-      type="checkbox"
-      class="size-4 rounded border-slate-300 accent-brand-600"
-      [formControl]="belowMinimumControl"
-    />
-    Somente abaixo do mínimo
-  </label>
-</section>
+</app-page-header>
 
 @if (error(); as message) {
-  <div
-    role="alert"
-    class="mb-4 flex items-center justify-between gap-3 rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800"
-  >
-    <span>{{ message }}</span>
-    <button appButton type="button" variant="secondary" size="sm" (click)="reload()">
+  <app-alert class="mb-4 shrink-0">
+    {{ message }}
+    <button alertAction appButton type="button" variant="secondary" size="sm" (click)="reload()">
       Tentar novamente
     </button>
-  </div>
+  </app-alert>
 }
 
-<section class="card overflow-hidden">
-  <div class="overflow-x-auto">
-    <table class="data-table" [class.opacity-60]="loading()">
-      <thead>
+<section class="card flex min-h-96 flex-1 flex-col overflow-hidden">
+  <div class="flex shrink-0 flex-wrap items-center gap-3 border-b border-line p-4">
+    <app-search-field
+      inputId="search"
+      label="Buscar produto"
+      placeholder="Buscar por código ou nome"
+      [control]="searchControl"
+    />
+
+    <div class="w-full sm:w-56">
+      <label for="category" class="sr-only">Categoria</label>
+      <select id="category" class="field-input h-10" [formControl]="categoryControl">
+        <option [ngValue]="null">Todas as categorias</option>
+        @for (category of categories(); track category.id) {
+          <option [ngValue]="category.id">{{ category.name }}</option>
+        }
+      </select>
+    </div>
+
+    <label
+      class="inline-flex h-10 cursor-pointer items-center gap-2 rounded-md border border-border-input bg-white px-3 text-sm font-medium text-text-strong transition select-none hover:bg-slate-50 has-checked:border-amber-700 has-checked:bg-amber-50 has-checked:text-amber-900 has-focus-visible:ring-2 has-focus-visible:ring-brand-primary has-focus-visible:ring-offset-2"
+    >
+      <input type="checkbox" class="sr-only" [formControl]="belowMinimumControl" />
+      <svg
+        viewBox="0 0 24 24"
+        class="size-4"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        aria-hidden="true"
+      >
+        <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3" />
+        <path d="M12 9v4" />
+        <path d="M12 17h.01" />
+      </svg>
+      Abaixo do mínimo
+    </label>
+
+    @if (hasFilters()) {
+      <button appButton type="button" variant="ghost" size="sm" (click)="clearFilters()">
+        Limpar filtros
+      </button>
+    }
+  </div>
+
+  <div class="min-h-0 flex-1 overflow-auto">
+    <table class="data-table min-w-224" [class.opacity-60]="loading()">
+      <thead class="sticky top-0 z-10">
         <tr>
           <th scope="col">Código</th>
           <th scope="col">Produto</th>
@@ -76,18 +86,18 @@
             <tr>
               <td class="font-mono text-xs">{{ product.code }}</td>
               <td class="font-medium">{{ product.name }}</td>
-              <td class="text-slate-600">{{ product.category?.name ?? '—' }}</td>
+              <td class="text-text-muted">{{ product.category?.name ?? '—' }}</td>
               <td class="text-right">
-                {{ product.stock.totalQuantity | number: '1.0-3' }} {{ unitLabel(product.unit) }}
+                {{ product.stock.totalQuantity | quantity: product.unit }}
               </td>
               <td class="text-right">
-                {{ product.stock.reservedQuantity | number: '1.0-3' }}
+                {{ product.stock.reservedQuantity | quantity }}
               </td>
               <td class="text-right font-semibold">
-                {{ product.stock.availableQuantity | number: '1.0-3' }}
+                {{ product.stock.availableQuantity | quantity }}
               </td>
-              <td class="text-right text-slate-600">
-                {{ product.minimumStock | number: '1.0-3' }}
+              <td class="text-right text-text-muted">
+                {{ product.minimumStock | quantity }}
               </td>
               <td>
                 @if (product.belowMinimumStock) {
@@ -97,7 +107,7 @@
                 }
               </td>
               @if (canManage()) {
-                <td class="whitespace-nowrap text-right">
+                <td class="text-right whitespace-nowrap">
                   <button
                     appButton
                     type="button"
@@ -121,14 +131,14 @@
             </tr>
           } @empty {
             <tr>
-              <td colspan="9" class="py-10 text-center text-slate-500">
+              <td colspan="9" class="py-16 text-center text-text-muted">
                 Nenhum produto encontrado.
               </td>
             </tr>
           }
         } @else if (loading()) {
           <tr>
-            <td colspan="9" class="py-10 text-center text-slate-500">Carregando...</td>
+            <td colspan="9" class="py-16 text-center text-text-muted">Carregando...</td>
           </tr>
         }
       </tbody>
@@ -136,7 +146,7 @@
   </div>
 
   @if (result(); as data) {
-    <div class="border-t border-slate-200 px-4 py-3">
+    <div class="shrink-0 border-t border-line px-4 py-3">
       <app-pagination
         [page]="data.page"
         [totalPages]="data.totalPages"

@@ -3,12 +3,14 @@ import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { errorMessage } from '../../../core/api/api-error';
 import { UsersService } from '../../../core/api/users.service';
 import { IUser } from '../../../core/models/api.models';
-import { ButtonComponent } from '../../../shared/components/button/button.component';
+import { AlertComponent } from '../../../shared/components/alert/alert.component';
+import { FormActionsComponent } from '../../../shared/components/form-actions/form-actions.component';
+import { isFieldInvalid } from '../../../shared/utils/forms';
 
 @Component({
   selector: 'app-reset-password-form',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ReactiveFormsModule, ButtonComponent],
+  imports: [FormActionsComponent, AlertComponent, ReactiveFormsModule],
   templateUrl: './reset-password-form.component.html',
 })
 export class ResetPasswordFormComponent {
@@ -22,6 +24,8 @@ export class ResetPasswordFormComponent {
 
   protected readonly saving = signal<boolean>(false);
   protected readonly error = signal<string | null>(null);
+
+  protected readonly isInvalid = isFieldInvalid;
 
   protected readonly form = this._fb.nonNullable.group({
     newPassword: ['', [Validators.required, Validators.minLength(8), Validators.maxLength(72)]],

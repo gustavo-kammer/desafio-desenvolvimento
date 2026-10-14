@@ -6,26 +6,30 @@ import {
   input,
 } from '@angular/core';
 
-export type ButtonVariant = 'primary' | 'secondary' | 'ghost' | 'danger';
-export type ButtonSize = 'sm' | 'md';
+export type ButtonVariant = 'primary' | 'add' | 'secondary' | 'ghost' | 'danger';
+export type ButtonSize = 'sm' | 'md' | 'lg';
 
 const BASE =
-  'inline-flex items-center justify-center gap-2 rounded-md font-semibold transition focus:ring-2 focus:ring-brand-500/50 focus:ring-offset-2 focus:outline-none disabled:cursor-not-allowed disabled:opacity-60';
+  'inline-flex items-center justify-center gap-2 font-semibold transition focus-visible:ring-2 focus-visible:ring-brand-primary focus-visible:ring-offset-2 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-60';
+
+const PRIMARY = 'bg-brand-primary text-white hover:bg-brand-primary-hover';
 
 const VARIANTS: Record<ButtonVariant, string> = {
-  primary: 'bg-brand-600 text-white hover:bg-brand-700',
+  primary: PRIMARY,
+  add: PRIMARY,
   secondary: 'border border-slate-300 bg-white text-slate-800 hover:bg-slate-50',
-  danger: 'bg-red-700 text-white hover:bg-red-800',
+  danger: 'bg-danger text-white hover:bg-danger-strong',
   ghost: 'text-slate-700 hover:bg-slate-100',
 };
 
 const SIZES: Record<ButtonSize, string> = {
-  sm: 'px-3 py-1.5 text-xs',
-  md: 'px-4 py-2.5 text-sm',
+  sm: 'rounded-md px-3 py-1.5 text-xs',
+  md: 'rounded-md px-4 py-2.5 text-sm',
+  lg: 'h-12 rounded-lg px-6 text-base',
 };
 
 @Component({
-  // eslint-disable-next-line @angular-eslint/component-selector -- seletor de atributo em <button> é intencional
+  // eslint-disable-next-line @angular-eslint/component-selector -- atributo em <button> preserva a semântica nativa
   selector: 'button[appButton]',
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
@@ -39,6 +43,19 @@ const SIZES: Record<ButtonSize, string> = {
         class="size-4 animate-spin rounded-full border-2 border-current border-t-transparent"
         aria-hidden="true"
       ></span>
+    } @else if (variant() === 'add') {
+      <svg
+        viewBox="0 0 24 24"
+        [class]="iconClass()"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2.5"
+        stroke-linecap="round"
+        aria-hidden="true"
+      >
+        <path d="M12 5v14" />
+        <path d="M5 12h14" />
+      </svg>
     }
     <ng-content />
   `,
@@ -51,5 +68,9 @@ export class ButtonComponent {
 
   protected readonly classes = computed<string>(
     () => `${BASE} ${VARIANTS[this.variant()]} ${SIZES[this.size()]}`,
+  );
+
+  protected readonly iconClass = computed<string>(() =>
+    this.size() === 'sm' ? 'size-3.5' : 'size-4',
   );
 }

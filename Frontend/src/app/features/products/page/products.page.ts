@@ -1,4 +1,3 @@
-import { DecimalPipe } from '@angular/common';
 import {
   ChangeDetectionStrategy,
   Component,
@@ -25,22 +24,28 @@ import { errorMessage } from '../../../core/api/api-error';
 import { CategoriesService } from '../../../core/api/categories.service';
 import { IProductFilter, ProductsService } from '../../../core/api/products.service';
 import { AuthService } from '../../../core/auth/auth.service';
-import { ICategory, IPagedResult, IProduct, UnitOfMeasure } from '../../../core/models/api.models';
+import { ICategory, IPagedResult, IProduct } from '../../../core/models/api.models';
 import { BadgeComponent } from '../../../shared/components/badge/badge.component';
 import { ButtonComponent } from '../../../shared/components/button/button.component';
 import { ConfirmDialogComponent } from '../../../shared/components/confirm-dialog/confirm-dialog.component';
 import { ModalComponent } from '../../../shared/components/modal/modal.component';
 import { PaginationComponent } from '../../../shared/components/pagination/pagination.component';
 import { ToastService } from '../../../shared/components/toast/toast.service';
-import { UNIT_LABELS } from '../../../shared/utils/labels';
 import { ProductFormComponent } from '../components/product-form.component';
+import { AlertComponent } from '../../../shared/components/alert/alert.component';
+import { PageHeaderComponent } from '../../../shared/components/page-header/page-header.component';
+import { SearchFieldComponent } from '../../../shared/components/search-field/search-field.component';
+import { QuantityPipe } from '../../../shared/pipes/quantity.pipe';
 
 @Component({
   selector: 'app-products-page',
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
+    QuantityPipe,
+    SearchFieldComponent,
+    PageHeaderComponent,
+    AlertComponent,
     ReactiveFormsModule,
-    DecimalPipe,
     BadgeComponent,
     ButtonComponent,
     ConfirmDialogComponent,
@@ -49,6 +54,7 @@ import { ProductFormComponent } from '../components/product-form.component';
     ProductFormComponent,
   ],
   templateUrl: './products.page.html',
+  host: { class: 'flex min-h-0 flex-1 flex-col' },
 })
 export class ProductsPage implements OnInit {
   private readonly _auth: AuthService = inject(AuthService);
@@ -61,6 +67,7 @@ export class ProductsPage implements OnInit {
   protected readonly searchControl = new FormControl<string>('', { nonNullable: true });
   protected readonly categoryControl = new FormControl<number | null>(null);
   protected readonly belowMinimumControl = new FormControl<boolean>(false, { nonNullable: true });
+  protected readonly hasFilters = signal<boolean>(false);
 
   protected readonly canManage = computed<boolean>(() => this._auth.hasRole('administrator'));
 
@@ -118,6 +125,7 @@ export class ProductsPage implements OnInit {
     )
       .pipe(takeUntilDestroyed(this._destroyRef))
       .subscribe((): void => {
+        this.hasFilters.set(this.hasActiveFilters());
         this.page.set(1);
         this.reload();
       });
@@ -130,10 +138,6 @@ export class ProductsPage implements OnInit {
   protected goToPage(page: number): void {
     this.page.set(page);
     this.reload();
-  }
-
-  protected unitLabel(unit: UnitOfMeasure): string {
-    return UNIT_LABELS[unit];
   }
 
   protected openCreate(): void {
@@ -189,5 +193,20 @@ export class ProductsPage implements OnInit {
       onlyBelowMinimumStock: this.belowMinimumControl.value,
       page: this.page(),
     };
+  }
+
+  protected clearFilters(): void {
+    this.hasFilters.set(false);
+    this.searchControl.reset();
+    this.categoryControl.reset();
+    this.belowMinimumControl.reset();
+  }
+
+  private hasActiveFilters(): boolean {
+    return (
+      this.searchControl.value.trim() !== '' ||
+      this.categoryControl.value !== null ||
+      this.belowMinimumControl.value
+    );
   }
 }

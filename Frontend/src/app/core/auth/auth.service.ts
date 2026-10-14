@@ -26,7 +26,7 @@ export class AuthService {
     () => this._session()?.accessToken ?? null,
   );
 
-  public login(email: string, password: string): Observable<ILoginResponse> {
+  public login(email: string, password: string, remember = true): Observable<ILoginResponse> {
     return this._http
       .post<ILoginResponse>(`${environment.apiUrl}/auth/login`, { email, password })
       .pipe(
@@ -37,18 +37,14 @@ export class AuthService {
             user: response.user,
           };
           this._session.set(session);
-          this.save(session);
+          this.save(session, remember);
         }),
       );
   }
 
   public logout(redirect = true): void {
     this._session.set(null);
-    try {
-      localStorage.removeItem(STORAGE_KEY);
-    } catch {
-      /* armazenamento indisponível */
-    }
+    this.clear();
     if (redirect) {
       void this._router.navigate(['/login']);
     }
@@ -59,22 +55,33 @@ export class AuthService {
     return role !== null && roles.includes(role);
   }
 
-  private save(session: ISession): void {
+  private save(session: ISession, remember: boolean): void {
+    this.clear();
     try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(session));
+      (remember ? localStorage : sessionStorage).setItem(STORAGE_KEY, JSON.stringify(session));
     } catch {
-      /* armazenamento indisponível: a sessão vale só até recarregar a página */
+      //
+    }
+  }
+
+  private clear(): void {
+    try {
+      localStorage.removeItem(STORAGE_KEY);
+      sessionStorage.removeItem(STORAGE_KEY);
+    } catch {
+      //
     }
   }
 
   private restore(): ISession | null {
     try {
-      const raw: string | null = localStorage.getItem(STORAGE_KEY);
+      const raw: string | null =
+        localStorage.getItem(STORAGE_KEY) ?? sessionStorage.getItem(STORAGE_KEY);
       if (!raw) return null;
 
       const session: ISession = JSON.parse(raw) as ISession;
       if (new Date(session.expiresAt).getTime() <= Date.now()) {
-        localStorage.removeItem(STORAGE_KEY);
+        this.clear();
         return null;
       }
       return session;
